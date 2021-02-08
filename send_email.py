@@ -23,7 +23,7 @@ with open(EMAIL_TEMPLATE_PATH) as email_template:
 
 
 def email(recipients, content=EMAIL_TEMPLATE_CONTENT, attachments=None):
-    if recipients is None:
+    if not recipients:
         return
     gmail_user = Config.EMAIL_USER
     gmail_password = Config.EMAIL_PASSWORD
@@ -39,7 +39,7 @@ def email(recipients, content=EMAIL_TEMPLATE_CONTENT, attachments=None):
     msg_text = content
     msg["Subject"] = subject
     msg["From"] = sender
-    msg["To"] = recipients
+    msg["To"] = ",".join(recipients)
     if attachments is not None:
         attach_count = 0
         for each_file_path in attachments:
@@ -59,8 +59,8 @@ images = []
 img_paths = []
 for key, value in Config.COST_MGMT_RECIPIENTS_JSON.items():
     print(f"Creating email content for {key} with values {value}.")
-    email_addr = value.get("email")
-    if email_addr is None:
+    email_addrs = value.get("emails", [])
+    if email_addrs is None:
         break
     aws = value.get("aws", {})
     costs = costquerier.get_cost_data(path=costquerier.AWS_COST_ENDPONT, params=aws)
@@ -95,7 +95,7 @@ for key, value in Config.COST_MGMT_RECIPIENTS_JSON.items():
             file_name = img_path.split("/")[-1]
             template_variables[file_name] = file_name
         email_msg = email_template.render(**template_variables)
-        email(recipients=email_addr, content=email_msg, attachments=img_paths)
+        email(recipients=email_addrs, content=email_msg, attachments=img_paths)
 
     for img in images:
         os.unlink(img.name)
