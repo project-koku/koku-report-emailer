@@ -1,16 +1,18 @@
+import os
 import smtplib
 from datetime import datetime
 from email.encoders import encode_base64
 from email.mime.base import MIMEBase
+from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from pathlib import Path
 
 from costemailer import costquerier
+from costemailer.charting import plot_data
 from costemailer.config import Config
 from jinja2 import Template
 
-# from email.mime.image import MIMEImage
 
 PRODUCTION_ENDPOINT = "https://cloud.redhat.com"
 REL_TEMPLATE_PATH = "costemailer/resources/CostEmailTemplate.html"
@@ -39,21 +41,22 @@ def email(recipients, content=EMAIL_TEMPLATE_CONTENT, attachments=None):
     msg["From"] = sender
     msg["To"] = recipients
     if attachments is not None:
+        attach_count = 0
         for each_file_path in attachments:
             try:
                 file_name = each_file_path.split("/")[-1]
-                part = MIMEBase("application", "octet-stream")
-                part.set_payload(open(each_file_path, "rb").read())
-
-                encode_base64(part)
-                part.add_header("Content-Disposition", "attachment", filename=file_name)
-                msg.attach(part)
-            except:  # noqa: E722
-                print("Could not attach file.")
+                msgImage = MIMEImage(open(each_file_path, "rb").read(), filename=file_name)
+                msgImage.add_header("Content-ID", f"<image{attach_count}>")
+                msg.attach(msgImage)
+                attach_count += 1
+            except Exception as err:  # noqa: E722
+                print(f"Could not attach file: {err}")
     msg.attach(MIMEText(msg_text, "html"))
     s.sendmail(sender, recipients, msg.as_string())
 
 
+images = []
+img_paths = []
 for key, value in Config.COST_MGMT_RECIPIENTS_JSON.items():
     print(f"Creating email content for {key} with values {value}.")
     email_addr = value.get("email")
@@ -63,6 +66,10 @@ for key, value in Config.COST_MGMT_RECIPIENTS_JSON.items():
     costs = costquerier.get_cost_data(path=costquerier.AWS_COST_ENDPONT, params=aws)
     meta = costs.get("meta", {})
     data = costs.get("data", [])
+    img_file, img_path = plot_data(data)
+    images.append(img_file)
+    img_paths.append(img_path)
+
     if len(data) > 0:
         daily = data[0]
         date = daily["date"]
@@ -82,6 +89,14 @@ for key, value in Config.COST_MGMT_RECIPIENTS_JSON.items():
             "aws_cost_delta": formatted_delta,
             "web_url": PRODUCTION_ENDPOINT,
             "units": total["units"],
+            "aws_img_index": 0,
         }
+        for img_path in img_paths:
+            file_name = img_path.split("/")[-1]
+            template_variables[file_name] = file_name
         email_msg = email_template.render(**template_variables)
-        email(recipients=email_addr, content=email_msg)
+        email(recipients=email_addr, content=email_msg, attachments=img_paths)
+
+    for img in images:
+        os.unlink(img.name)
+        img.close()
