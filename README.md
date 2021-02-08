@@ -18,7 +18,23 @@ This is a Python project developed using Python 3.8. Make sure you have at least
 After following the setup steps described below the following components and flow will be in place for your development environment.
 
 ```
-TBD
+  +----------------------------------+                                         +-------------------------+
+  |                                  +---------------------------------------->+                         |
+  |   cost-mgmt-emailer              |                                         |    cloud.redhat.com     |
+  |                                  |                                         |                         |
+  |                                  +<----------------------------------------+                         |
+  +----------------------------------+                                         +-------------------------+
+                    |
+                    |
+                    |
+                    |
+                    |
+                    |                          +-----------------+
+                    |                          |                 |
+                    |                          |    gmail.com    |
+                    +------------------------->+                 |
+                                               |                 |
+                                               +-----------------+
 ```
 
 ### Obtain source for local projects
