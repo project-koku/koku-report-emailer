@@ -7,6 +7,8 @@ verify_ssl = true
 pre-commit = "*"
 
 [packages]
+requests = "*"
+jinja2 = "*"
 
 [requires]
 python_version = "3.8"
