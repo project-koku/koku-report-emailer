@@ -9,6 +9,8 @@ pre-commit = "*"
 [packages]
 requests = "*"
 jinja2 = "*"
+matplotlib = "*"
+pandas = "*"
 
 [requires]
 python_version = "3.8"
