@@ -460,7 +460,7 @@
                     </tr>
                     <tr>
                       <td class="rh-masthead__subhead">
-                        <h1>Cost Management update for ${cost_timeframe}</h1>
+                        <h1>Cost Management update for {{ cost_timeframe }}</h1>
                       </td>
                     </tr>
                   </table>
@@ -477,7 +477,7 @@
                     <tr>
                       <td class="rh-content__block">
                         <p>
-                          The following is a breakdown of costs associated with your OpenShift and Cloud sources:
+                          The following is a breakdown of costs associated with your registered sources:
                         </p>
                       </td>
                     </tr>
@@ -490,12 +490,8 @@
                           <tbody>
 
                             <tr>
-                              <th role="rowheader" scope="row">OpenShift Cost:</th>
-                              <td>${openshift_cost}</td> <td>${openshift_cost_delta}</td>
-                            </tr>
-                            <tr>
-                              <th role="rowheader" scope="row">Cloud Cost:</th>
-                              <td>${cloud_cost}</td> <td>${cloud_cost_delta}</td>
+                              <th role="rowheader" scope="row">Amazon Web Services:</th>
+                              <td>{{ aws_cost }} {{ units }}</td><td>monthly delta</td><td>{{ aws_cost_delta }} {{ units }}</td>
                             </tr>
                           </tbody>
                         </table>
@@ -514,7 +510,7 @@
                     <!-- Content block -->
                     <tr>
                       <td class="rh-content__block">
-                        <strong><a href="${web_url}/cost-management/" target="_blank">View more further cost details</a></strong> (requires authentication)
+                        <strong><a href="{{ web_url }}/cost-management/" target="_blank">View more further cost details</a></strong> (requires authentication)
                       </td>
                     </tr>
                     <!-- end content block -->
