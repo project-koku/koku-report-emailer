@@ -10,7 +10,7 @@ def plot_data(data):
     costs = []
     units = "USD"
 
-    if data:
+    if not data:
         return (None, None)
 
     for datum in data:
@@ -19,8 +19,8 @@ def plot_data(data):
         dates.append(values["date"])
         costs.append(values["cost"]["total"]["value"])
 
-    df = pd.DataFrame({"Dates": dates, units: costs})
-    bar = df[units].plot.bar(title="Cost", x="Dates", xlabel="Dates", y=units, ylabel=units)
+    df = pd.DataFrame({"Dates": dates, units: costs}, index=dates)
+    bar = df[units].plot.bar(title="Daily Cost", x="Dates", xlabel="Dates", y=units, ylabel=units)
     fig = bar.get_figure()
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
     fig.savefig(tmp.name)
