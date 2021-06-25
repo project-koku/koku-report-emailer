@@ -4,12 +4,7 @@ from .config import Config
 
 
 AWS_COST_ENDPONT = "reports/aws/costs/"
-CURRENT_MONTH_PARAMS = {
-    "filter[time_scope_units]": "month",
-    "filter[resolution]": "daily",
-    "filter[time_scope_value]": "-1",
-    "delta": "cost",
-}
+CURRENT_MONTH_PARAMS = {"filter[time_scope_units]": "month", "filter[time_scope_value]": "-1", "delta": "cost"}
 
 
 def get_cost_data(path="status/", params={}):

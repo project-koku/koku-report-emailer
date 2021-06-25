@@ -488,13 +488,28 @@
                       <td class="rh-content__block">
                         <table class="rh-data-table">
                           <tbody>
-
                             <tr>
                               <th role="rowheader" scope="row">Amazon Web Services:</th>
-                              <td>{{ aws_cost }} {{ units }}</td><td>monthly delta: {{ aws_cost_delta }} {{ units }}</td>
+                            </tr>
+                            <tr>
+                              <td>Montly Total: {{ aws_cost }} {{ units }}</td><td>Monthly Delta: {{ aws_cost_delta }} {{ units }}</td>
                             </tr>
                           </tbody>
                         </table>
+
+                        <table class="rh-data-table">
+                          <tbody>
+                            <tr>
+                              <th role="rowheader" scope="row">Account</th><th>Account Alias</th><th>Monthly Total</th><th>Monthly Delta</th>
+                            </tr>
+                            {% for item in aws_account_breakdown %}
+                            <tr>
+                              <td>{{ item.account }}</td><td>{{ item.account_alias }}</td><td>{{'%0.2f' % item.cost.total.value|float}} {{ item.cost.total.units }}</td><td>{{'%0.2f' % item.delta_value|float}}</td>
+                            </tr>
+                            {% endfor %}
+                          </tbody>
+                        </table>
+
                       </td>
                     </tr>
                     <tr>

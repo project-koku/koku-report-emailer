@@ -80,24 +80,32 @@ for email_item in email_list:
     email_addrs = [email_item.get("user", {}).get("email")]
     is_org_admin = email_item.get("user", {}).get("is_org_admin", False)
     aws_accounts = email_item.get("aws.account", [])
-    aws_params = costquerier.CURRENT_MONTH_PARAMS.copy()
-    costs = {}
+    aws_daily_params = costquerier.CURRENT_MONTH_PARAMS.copy()
+    aws_daily_params["filter[resolution]"] = "daily"
+    aws_montly_params = costquerier.CURRENT_MONTH_PARAMS.copy()
+    aws_montly_params["filter[resolution]"] = "monthly"
+    aws_montly_params["group_by[account]"] = "*"
+    daily_costs = {}
+    montly_costs = {}
     if is_org_admin:
-        costs = costquerier.get_cost_data(path=costquerier.AWS_COST_ENDPONT, params=aws_params)
+        daily_costs = costquerier.get_cost_data(path=costquerier.AWS_COST_ENDPONT, params=aws_daily_params)
+        montly_costs = costquerier.get_cost_data(path=costquerier.AWS_COST_ENDPONT, params=aws_montly_params)
     elif len(aws_accounts):
         for acct in aws_accounts:
-            aws_params["filter[account]"] = ",".join(aws_accounts)
-        costs = costquerier.get_cost_data(path=costquerier.AWS_COST_ENDPONT, params=aws_params)
+            aws_daily_params["filter[account]"] = ",".join(aws_accounts)
+            aws_montly_params["filter[account]"] = ",".join(aws_accounts)
+        daily_costs = costquerier.get_cost_data(path=costquerier.AWS_COST_ENDPONT, params=aws_daily_params)
+        montly_costs = costquerier.get_cost_data(path=costquerier.AWS_COST_ENDPONT, params=aws_montly_params)
     else:
         break
-    meta = costs.get("meta", {})
-    data = costs.get("data", [])
-    img_file, img_path = plot_data(data)
+    meta = daily_costs.get("meta", {})
+    daily_data = daily_costs.get("data", [])
+    img_file, img_path = plot_data(daily_data)
     images.append(img_file)
     img_paths.append(img_path)
 
-    if len(data) > 0:
-        daily = data[0]
+    if len(daily_data) > 0:
+        daily = daily_data[0]
         date = daily["date"]
         total = meta["total"]["cost"]["total"]
         formatted_total = "{:.2f}".format(total["value"])
@@ -108,11 +116,23 @@ for email_item in email_list:
             f' {total["units"]} with a delta of'
             f' {formatted_delta} {total["units"]}'
         )
+
+        monthly_data = montly_costs.get("data", [])
+        accounts_data = monthly_data[0].get("accounts", [])
+        account_breakdown = []
+        for acct_data in accounts_data:
+            acct_datum = acct_data.get("values", [{}])[0]
+            account_breakdown.append(acct_datum)
+            print(
+                f"{acct_datum.get('account')}/{acct_datum.get('account_alias')}: {acct_datum.get('cost',{}).get('total')} ({acct_datum.get('delta_value')})"
+            )
+
         email_template = Template(EMAIL_TEMPLATE_CONTENT)
         template_variables = {
             "cost_timeframe": current_month,
             "aws_cost": formatted_total,
             "aws_cost_delta": formatted_delta,
+            "aws_account_breakdown": account_breakdown,
             "web_url": PRODUCTION_ENDPOINT,
             "units": total["units"],
             "aws_img_index": 0,
