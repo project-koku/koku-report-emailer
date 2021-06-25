@@ -11,6 +11,9 @@ from pathlib import Path
 from costemailer import costquerier
 from costemailer.charting import plot_data
 from costemailer.config import Config
+from costemailer.rbac import AWS_ACCOUNT_ACCESS
+from costemailer.rbac import get_access
+from costemailer.rbac import get_users
 from jinja2 import Template
 
 
@@ -55,15 +58,38 @@ def email(recipients, content=EMAIL_TEMPLATE_CONTENT, attachments=None):
     s.sendmail(sender, recipients, msg.as_string())
 
 
+email_list = []
+print(f"COST_MGMT_RECIPIENTS={Config.COST_MGMT_RECIPIENTS}")
+account_users = get_users()
+print(f"Account has {len(account_users)} users.")
+for user in account_users:
+    username = user.get("username")
+    if username not in Config.COST_MGMT_RECIPIENTS:
+        print(f"User {username} is not in recipient list.")
+    else:
+        user_email = user.get("email")
+        print(f"User {username} is in recipient list with email {user_email}.")
+        user_info = {"user": user, "aws.account": get_access(username, AWS_ACCOUNT_ACCESS)}
+        email_list.append(user_info)
+
+
 images = []
 img_paths = []
-for key, value in Config.COST_MGMT_RECIPIENTS_JSON.items():
-    print(f"Creating email content for {key} with values {value}.")
-    email_addrs = value.get("emails", [])
-    if email_addrs is None:
+for email_item in email_list:
+    print(f"User info: {email_item}.")
+    email_addrs = [email_item.get("user", {}).get("email")]
+    is_org_admin = email_item.get("user", {}).get("is_org_admin", False)
+    aws_accounts = email_item.get("aws.account", [])
+    aws_params = costquerier.CURRENT_MONTH_PARAMS.copy()
+    costs = {}
+    if is_org_admin:
+        costs = costquerier.get_cost_data(path=costquerier.AWS_COST_ENDPONT, params=aws_params)
+    elif len(aws_accounts):
+        for acct in aws_accounts:
+            aws_params["filter[account]"] = ",".join(aws_accounts)
+        costs = costquerier.get_cost_data(path=costquerier.AWS_COST_ENDPONT, params=aws_params)
+    else:
         break
-    aws = value.get("aws", {})
-    costs = costquerier.get_cost_data(path=costquerier.AWS_COST_ENDPONT, params=aws)
     meta = costs.get("meta", {})
     data = costs.get("data", [])
     img_file, img_path = plot_data(data)
