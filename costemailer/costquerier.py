@@ -2,16 +2,19 @@ import requests
 
 from .config import Config
 
-CLOUD_DOT_API_ROOT = "https://cloud.redhat.com"
-COST_MGMT_API_PREFIX = "/api/cost-management/v1/"
-
 
 AWS_COST_ENDPONT = "reports/aws/costs/"
+CURRENT_MONTH_PARAMS = {
+    "filter[time_scope_units]": "month",
+    "filter[resolution]": "daily",
+    "filter[time_scope_value]": "-1",
+    "delta": "cost",
+}
 
 
 def get_cost_data(path="status/", params={}):
     """Obtain the response cost data."""
-    api_call = CLOUD_DOT_API_ROOT + COST_MGMT_API_PREFIX + path
+    api_call = Config.CLOUD_DOT_API_ROOT + Config.COST_MGMT_API_PREFIX + path
     credentials = (Config.CLOUD_DOT_USERNAME, Config.CLOUD_DOT_PASSWORD)
     response = requests.get(api_call, params=params, auth=credentials)
 
