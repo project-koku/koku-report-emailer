@@ -20,7 +20,7 @@ After following the setup steps described below the following components and flo
 ```
   +----------------------------------+                                         +-------------------------+
   |                                  +---------------------------------------->+                         |
-  |   koku-report-emailer              |                                       |    cloud.redhat.com     |
+  |   koku-report-emailer            |                                         |    cloud.redhat.com     |
   |                                  |                                         |                         |
   |                                  +<----------------------------------------+                         |
   +----------------------------------+                                         +-------------------------+
@@ -40,7 +40,7 @@ After following the setup steps described below the following components and flo
 ### Obtain source for local projects
 To get started developing the koku-report-emailer first clone a local copy of the git repository.
 ```
-git clone https://github.com/chambridge/koku-report-emailer.git
+git clone https://github.com/project-koku/koku-report-emailer.git
 ```
 
 ### Configure environment variables
