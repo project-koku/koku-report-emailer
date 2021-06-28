@@ -18,23 +18,23 @@ This is a Python project developed using Python 3.8. Make sure you have at least
 After following the setup steps described below the following components and flow will be in place for your development environment.
 
 ```
-  +----------------------------------+                                         +-------------------------+
-  |                                  +---------------------------------------->+                         |
-  |   koku-report-emailer            |                                         |    cloud.redhat.com     |
-  |                                  |                                         |                         |
-  |                                  +<----------------------------------------+                         |
-  +----------------------------------+                                         +-------------------------+
+  +----------------------------+                                   +-------------------------+
+  |                            +---------------------------------->+                         |
+  |   koku-report-emailer      |                                   |    cloud.redhat.com     |
+  |                            |                                   |                         |
+  |                            +<----------------------------------+                         |
+  +----------------------------+                                   +-------------------------+
                     |
                     |
                     |
                     |
                     |
-                    |                          +-----------------+
-                    |                          |                 |
-                    |                          |    gmail.com    |
-                    +------------------------->+                 |
-                                               |                 |
-                                               +-----------------+
+                    |                     +-----------------+
+                    |                     |                 |
+                    |                     |    gmail.com    |
+                    +-------------------->+                 |
+                                          |                 |
+                                          +-----------------+
 ```
 
 ### Obtain source for local projects
@@ -44,7 +44,7 @@ git clone https://github.com/project-koku/koku-report-emailer.git
 ```
 
 ### Configure environment variables
-This project is developed using the Django web framework. Many configuration settings can be read in from a `.env` file. An example file `.env.dev.example` is provided in the repository. To use the defaults simply run:
+Many configuration settings can be read in from a `.env` file. An example file `.env.dev.example` is provided in the repository. To use the defaults simply run:
 ```
 cp .env.dev.example .env
 ```

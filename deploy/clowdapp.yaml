@@ -1,0 +1,129 @@
+---
+apiVersion: v1
+kind: Template
+metadata:
+  name: koku-report-emailer
+objects:
+
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: koku-report-emailer-secret
+  data:
+    clouddot-user: ''
+    clouddot-password: ''
+  type: Opaque
+
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: koku-daily-secret
+  data:
+    email_user: ''
+    email_password: ''
+  type: Opaque
+
+- apiVersion: cloud.redhat.com/v1alpha1
+  kind: ClowdApp
+  metadata:
+    name: koku-report-emailer
+  spec:
+    envName: ${ENV_NAME}
+    jobs:
+    - name: koku-report-emailer
+      schedule: ${EMAIL_SCHEDULE}
+      restartPolicy: Never
+      concurrencyPolicy: Forbid
+      startingDeadlineSeconds: ${{EMAIL_STARTING_DEADLINE}}
+      podSpec:
+        image: ${IMAGE}:${IMAGE_TAG}
+        command: ["python", "send_email.py"]
+        env:
+          - name: CLOUD_DOT_API_ROOT
+            value: ${CLOUD_DOT_API_ROOT}
+          - name: CLOUD_DOT_USERNAME
+            valueFrom:
+              secretKeyRef:
+                key: clouddot-user
+                name: koku-report-emailer-secret
+                optional: true
+          - name: CLOUD_DOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: clouddot-password
+                name: koku-report-emailer-secret
+                optional: true
+          - name: EMAIL_USER
+            valueFrom:
+              secretKeyRef:
+                key: email_user
+                name: koku-daily-secret
+                optional: true
+          - name: EMAIL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: email_password
+                name: koku-daily-secret
+                optional: true
+          - name: CLOWDER_ENABLED
+            value: ${CLOWDER_ENABLED}
+          - name: NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: COST_MGMT_API_PREFIX
+            value: ${COST_MGMT_API_PREFIX}
+          - name: RBAC_API_PREFIX
+            value: ${RBAC_API_PREFIX}
+          - name: COST_MGMT_RECIPIENTS
+            value: ${COST_MGMT_RECIPIENTS}
+        resources:
+          requests:
+            cpu: ${CPU_REQUEST}
+            memory: ${MEMORY_REQUEST}
+          limits:
+            cpu: ${CPU_LIMIT}
+            memory: ${MEMORY_LIMIT}
+
+
+
+parameters:
+- description: The name
+  name: NAME
+  value: koku-report-emailer
+- description: Initial amount of CPU
+  name: CPU_REQUEST
+  value: 100m
+- description: Initial amount of memory
+  name: MEMORY_REQUEST
+  value: 256Mi
+- description: Cpu limit of service
+  name: CPU_LIMIT
+  value: 300m
+- description: memory limit of service
+  name: MEMORY_LIMIT
+  value: 512Mi
+- description: Image tag
+  name: IMAGE_TAG
+  required: true
+- description: Image name
+  name: IMAGE
+  value: quay.io/cloudservices/koku-report-emailer
+- description: Determines Clowder deployment
+  name: CLOWDER_ENABLED
+  value: "true"
+- description: ClowdEnv Name
+  name: ENV_NAME
+  requred: false
+- name: EMAIL_SCHEDULE
+  value: '0 15 * * *'
+- name: EMAIL_STARTING_DEADLINE
+  value: '300'
+- name: CLOUD_DOT_API_ROOT
+  value: 'https://cloud.redhat.com/api/'
+- name: COST_MGMT_API_PREFIX
+  value: 'cost-management/v1/'
+- name: RBAC_API_PREFIX
+  value: 'rbac/v1/'
+- name: COST_MGMT_RECIPIENTS
+  value: '{}'
