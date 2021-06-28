@@ -19,6 +19,8 @@ from jinja2 import Template
 
 PRODUCTION_ENDPOINT = "https://cloud.redhat.com"
 REL_TEMPLATE_PATH = "costemailer/resources/CostEmailTemplate.html"
+REL_LOGO_PATH = "costemailer/resources/Logo-Red_Hat-cost-management-RGB.png"
+LOGO_PATH = Path(__file__).parent / REL_LOGO_PATH
 EMAIL_TEMPLATE_PATH = Path(__file__).parent / REL_TEMPLATE_PATH
 EMAIL_TEMPLATE_CONTENT = None
 with open(EMAIL_TEMPLATE_PATH) as email_template:
@@ -64,20 +66,22 @@ account_users = get_users()
 print(f"Account has {len(account_users)} users.")
 for user in account_users:
     username = user.get("username")
-    if username not in Config.COST_MGMT_RECIPIENTS:
+    if username not in Config.COST_MGMT_RECIPIENTS.keys():
         print(f"User {username} is not in recipient list.")
     else:
         user_email = user.get("email")
-        print(f"User {username} is in recipient list with email {user_email}.")
-        user_info = {"user": user, "aws.account": get_access(username, AWS_ACCOUNT_ACCESS)}
+        cc_list = Config.COST_MGMT_RECIPIENTS.get(username, {}).get("cc", [])
+        print(f"User {username} is in recipient list with email {user_email} and cc list {cc_list}.")
+        user_info = {"user": user, "aws.account": get_access(username, AWS_ACCOUNT_ACCESS), "cc": cc_list}
         email_list.append(user_info)
 
 
 images = []
-img_paths = []
+img_paths = [str(LOGO_PATH)]
 for email_item in email_list:
     print(f"User info: {email_item}.")
-    email_addrs = [email_item.get("user", {}).get("email")]
+    curr_user_email = email_item.get("user", {}).get("email")
+    email_addrs = [curr_user_email] + email_item.get("cc", [])
     is_org_admin = email_item.get("user", {}).get("is_org_admin", False)
     aws_accounts = email_item.get("aws.account", [])
     aws_daily_params = costquerier.CURRENT_MONTH_PARAMS.copy()
@@ -135,7 +139,7 @@ for email_item in email_list:
             "aws_account_breakdown": account_breakdown,
             "web_url": PRODUCTION_ENDPOINT,
             "units": total["units"],
-            "aws_img_index": 0,
+            "aws_img_index": 1,
         }
         for img_path in img_paths:
             file_name = img_path.split("/")[-1]
