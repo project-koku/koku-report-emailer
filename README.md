@@ -1,4 +1,4 @@
-# cost-mgmt-emailer
+# koku-report-emailer
 Delivers regular emails of cost management data in an HTML format
 
 
@@ -20,7 +20,7 @@ After following the setup steps described below the following components and flo
 ```
   +----------------------------------+                                         +-------------------------+
   |                                  +---------------------------------------->+                         |
-  |   cost-mgmt-emailer              |                                         |    cloud.redhat.com     |
+  |   koku-report-emailer              |                                       |    cloud.redhat.com     |
   |                                  |                                         |                         |
   |                                  +<----------------------------------------+                         |
   +----------------------------------+                                         +-------------------------+
@@ -38,9 +38,9 @@ After following the setup steps described below the following components and flo
 ```
 
 ### Obtain source for local projects
-To get started developing the cost-mgmt-emailer first clone a local copy of the git repository.
+To get started developing the koku-report-emailer first clone a local copy of the git repository.
 ```
-git clone https://github.com/chambridge/cost-mgmt-emailer.git
+git clone https://github.com/chambridge/koku-report-emailer.git
 ```
 
 ### Configure environment variables
