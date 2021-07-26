@@ -76,9 +76,9 @@ for user in account_users:
         email_list.append(user_info)
 
 
-images = []
-img_paths = [str(LOGO_PATH)]
 for email_item in email_list:
+    images = []
+    img_paths = [str(LOGO_PATH)]
     print(f"User info: {email_item}.")
     curr_user_email = email_item.get("user", {}).get("email")
     email_addrs = [curr_user_email] + email_item.get("cc", [])
@@ -147,6 +147,7 @@ for email_item in email_list:
         email_msg = email_template.render(**template_variables)
         email(recipients=email_addrs, content=email_msg, attachments=img_paths)
 
-    for img in images:
-        os.unlink(img.name)
-        img.close()
+        for img in images:
+            if os.path.exists(img.name):
+                os.unlink(img.name)
+                img.close()
