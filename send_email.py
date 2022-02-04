@@ -104,6 +104,16 @@ for email_item in email_list:
         break
     meta = daily_costs.get("meta", {})
     daily_data = daily_costs.get("data", [])
+
+    values_present = False
+    for day_data in daily_data:
+        if day_data.get("values"):
+            values_present = True
+
+    if not daily_data or not values_present:
+        print("Empty daily data values ... skipping report.")
+        continue
+
     img_file, img_path = plot_data(daily_data)
     images.append(img_file)
     img_paths.append(img_path)

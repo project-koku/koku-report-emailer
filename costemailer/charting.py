@@ -23,6 +23,10 @@ def plot_data(data):
             units = values["cost"]["total"]["units"]
             dates.append(values["date"])
             costs.append(values["cost"]["total"]["value"])
+        else:
+            units = "USD"
+            dates.append(datum["date"])
+            costs.append(0.0)
 
     df = pd.DataFrame({"Dates": dates, units: costs}, index=dates)
     bar = df[units].plot.bar(title="Daily Cost", x="Dates", xlabel="Dates", y=units, ylabel=units)
