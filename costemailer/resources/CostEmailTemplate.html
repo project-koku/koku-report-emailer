@@ -460,7 +460,7 @@
                     </tr>
                     <tr>
                       <td class="rh-masthead__subhead">
-                        <h1>Cost Management update for {{ cost_timeframe }}</h1>
+                        <h1>{{ cost_masthead }}</h1>
                       </td>
                     </tr>
                   </table>
@@ -492,19 +492,39 @@
                               <th role="rowheader" scope="row">Amazon Web Services:</th>
                             </tr>
                             <tr>
-                              <td>Montly Total: {{ aws_cost }} {{ units }}</td><td>Monthly Delta: {{ aws_cost_delta }} {{ units }}</td>
+                              <td><i>Monthly Total:</i> {{ aws_cost }} {{ units }}</td>
                             </tr>
+                            <tr>
+                              <td><i>Monthly Delta:</i> {{ aws_cost_delta }} {{ units }}</td>
+                            </tr>
+                            {% if aws_budget_monthly_total is defined%}
+                            <tr>
+                              <td><i>Monthly Budget:</i> {{ aws_budget_monthly_total }} {{ units }}</td>
+                            </tr>
+                            {% endif %}
                           </tbody>
                         </table>
 
                         <table class="rh-data-table">
                           <tbody>
                             <tr>
-                              <th role="rowheader" scope="row">Account</th><th>Account Alias</th><th>Monthly Total</th><th>Monthly Delta</th>
+                              <th role="rowheader" scope="row" style="text-align: center">Account</th>
+                              <th style="text-align: center">Account Alias</th>
+                              <th style="text-align: center">Monthly Total</th>
+                              <th style="text-align: center">Delta</th>
+                            {% if aws_account_breakdown is defined and aws_account_breakdown[0].budget %}
+                              <th style="text-align: center">Budget</th>
+                            {% endif %}
                             </tr>
                             {% for item in aws_account_breakdown %}
                             <tr>
-                              <td>{{ item.account }}</td><td>{{ item.account_alias }}</td><td>{{'%0.2f' % item.cost.total.value|float}} {{ item.cost.total.units }}</td><td>{{'%0.2f' % item.delta_value|float}}</td>
+                              <td>{{ item.account }}</td>
+                              <td>{{ item.account_alias }}</td>
+                              <td>{{'%0.2f' % item.cost.total.value|float}} {{ item.cost.total.units }}</td>
+                              <td>{{'%0.2f' % item.delta_value|float}} {{ item.cost.total.units }}</td>
+                              {% if item.budget %}
+                              <td>{{'%0.2f' % item.budget|float}} {{ item.cost.total.units }}</td>
+                              {% endif %}
                             </tr>
                             {% endfor %}
                           </tbody>

@@ -13,7 +13,7 @@ class Config:
 
     CLOUD_DOT_USERNAME = os.getenv("CLOUD_DOT_USERNAME")
     CLOUD_DOT_PASSWORD = os.getenv("CLOUD_DOT_PASSWORD")
-    CLOUD_DOT_API_ROOT = os.getenv("CLOUD_DOT_API_ROOT", "https://cloud.redhat.com/api/")
+    CLOUD_DOT_API_ROOT = os.getenv("CLOUD_DOT_API_ROOT", "https://console.redhat.com/api/")
 
     COST_MGMT_RECIPIENTS = os.getenv("COST_MGMT_RECIPIENTS", "{}")
     COST_MGMT_API_PREFIX = os.getenv("COST_MGMT_API_PREFIX", "cost-management/v1/")
