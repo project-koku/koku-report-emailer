@@ -33,4 +33,5 @@ def plot_data(data):
     fig = bar.get_figure()
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
     fig.savefig(tmp.name)
+    fig.clf()
     return (tmp, tmp.name)
