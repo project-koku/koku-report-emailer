@@ -12,6 +12,7 @@ from costemailer import costquerier
 from costemailer.charting import plot_data
 from costemailer.config import Config
 from costemailer.rbac import AWS_ACCOUNT_ACCESS
+from costemailer.rbac import AWS_ORG_ACCESS
 from costemailer.rbac import get_access
 from costemailer.rbac import get_users
 from jinja2 import Template
@@ -72,7 +73,13 @@ for user in account_users:
         user_email = user.get("email")
         cc_list = Config.COST_MGMT_RECIPIENTS.get(username, {}).get("cc", [])
         print(f"User {username} is in recipient list with email {user_email} and cc list {cc_list}.")
-        user_info = {"user": user, "aws.account": get_access(username, AWS_ACCOUNT_ACCESS), "cc": cc_list}
+        user_access = get_access(username, [AWS_ACCOUNT_ACCESS, AWS_ORG_ACCESS])
+        user_info = {
+            "user": user,
+            "aws.account": user_access[AWS_ACCOUNT_ACCESS],
+            "aws.organizational_unit": user_access[AWS_ORG_ACCESS],
+            "cc": cc_list,
+        }
         email_list.append(user_info)
 
 
@@ -84,6 +91,7 @@ for email_item in email_list:
     email_addrs = [curr_user_email] + email_item.get("cc", [])
     is_org_admin = email_item.get("user", {}).get("is_org_admin", False)
     aws_accounts = email_item.get("aws.account", [])
+    aws_orgs = email_item.get("aws.organizational_unit", [])
     aws_daily_params = costquerier.CURRENT_MONTH_PARAMS.copy()
     aws_daily_params["filter[resolution]"] = "daily"
     aws_montly_params = costquerier.CURRENT_MONTH_PARAMS.copy()
@@ -94,14 +102,17 @@ for email_item in email_list:
     if is_org_admin:
         daily_costs = costquerier.get_cost_data(path=costquerier.AWS_COST_ENDPONT, params=aws_daily_params)
         montly_costs = costquerier.get_cost_data(path=costquerier.AWS_COST_ENDPONT, params=aws_montly_params)
-    elif len(aws_accounts):
-        for acct in aws_accounts:
+    elif len(aws_accounts) or len(aws_orgs):
+        if len(aws_accounts):
             aws_daily_params["filter[account]"] = ",".join(aws_accounts)
             aws_montly_params["filter[account]"] = ",".join(aws_accounts)
+        if len(aws_orgs):
+            aws_daily_params["filter[org_unit_id]"] = ",".join(aws_orgs)
+            aws_montly_params["filter[org_unit_id]"] = ",".join(aws_orgs)
         daily_costs = costquerier.get_cost_data(path=costquerier.AWS_COST_ENDPONT, params=aws_daily_params)
         montly_costs = costquerier.get_cost_data(path=costquerier.AWS_COST_ENDPONT, params=aws_montly_params)
     else:
-        break
+        continue
     meta = daily_costs.get("meta", {})
     daily_data = daily_costs.get("data", [])
 
