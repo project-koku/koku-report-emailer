@@ -7,6 +7,7 @@ USER_ENDPONT = "principals/"
 ACCESS_ENDPOINT = "access/"
 
 AWS_ACCOUNT_ACCESS = "cost-management:aws.account:read"
+AWS_ORG_ACCESS = "cost-management:aws.organizational_unit:read"
 
 
 def get_rbac_data(path="status/", params={}):
@@ -39,18 +40,21 @@ def _get_access(username):
     return response.get("data", [])
 
 
-def get_access(username, permission):
+def get_access(username, permissions):
     """Obtain user access for a specific permision"""
-    resources = []
+    resources = {}
+    for perm in permissions:
+        resources[perm] = []
     all_access = _get_access(username)
     for access in all_access:
-        if access.get("permission") == permission:
+        access_perm = access.get("permission")
+        if access_perm in permissions:
             resource_defs = access.get("resourceDefinitions", [])
             for definition in resource_defs:
                 def_value = definition.get("attributeFilter", {}).get("value")
                 def_operation = definition.get("attributeFilter", {}).get("operation")
                 if def_operation == "in":
-                    resources = resources + def_value.split(",")
+                    resources[access_perm] = resources[access_perm] + def_value.split(",")
                 elif def_operation == "equal":
-                    resources.append(def_value)
+                    resources[access_perm].append(def_value)
     return resources
