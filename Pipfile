@@ -11,6 +11,7 @@ requests = "*"
 jinja2 = "*"
 matplotlib = "*"
 pandas = "*"
+pyyaml = "*"
 
 [requires]
 python_version = "3.8"
