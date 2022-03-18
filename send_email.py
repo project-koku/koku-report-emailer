@@ -94,23 +94,23 @@ for email_item in email_list:
     aws_orgs = email_item.get("aws.organizational_unit", [])
     aws_daily_params = costquerier.CURRENT_MONTH_PARAMS.copy()
     aws_daily_params["filter[resolution]"] = "daily"
-    aws_montly_params = costquerier.CURRENT_MONTH_PARAMS.copy()
-    aws_montly_params["filter[resolution]"] = "monthly"
-    aws_montly_params["group_by[account]"] = "*"
+    aws_monthly_params = costquerier.CURRENT_MONTH_PARAMS.copy()
+    aws_monthly_params["filter[resolution]"] = "monthly"
+    aws_monthly_params["group_by[account]"] = "*"
     daily_costs = {}
-    montly_costs = {}
+    monthly_costs = {}
     if is_org_admin:
         daily_costs = costquerier.get_cost_data(path=costquerier.AWS_COST_ENDPONT, params=aws_daily_params)
-        montly_costs = costquerier.get_cost_data(path=costquerier.AWS_COST_ENDPONT, params=aws_montly_params)
+        monthly_costs = costquerier.get_cost_data(path=costquerier.AWS_COST_ENDPONT, params=aws_monthly_params)
     elif len(aws_accounts) or len(aws_orgs):
         if len(aws_accounts):
             aws_daily_params["filter[account]"] = ",".join(aws_accounts)
-            aws_montly_params["filter[account]"] = ",".join(aws_accounts)
+            aws_monthly_params["filter[account]"] = ",".join(aws_accounts)
         if len(aws_orgs):
             aws_daily_params["filter[org_unit_id]"] = ",".join(aws_orgs)
-            aws_montly_params["filter[org_unit_id]"] = ",".join(aws_orgs)
+            aws_monthly_params["filter[org_unit_id]"] = ",".join(aws_orgs)
         daily_costs = costquerier.get_cost_data(path=costquerier.AWS_COST_ENDPONT, params=aws_daily_params)
-        montly_costs = costquerier.get_cost_data(path=costquerier.AWS_COST_ENDPONT, params=aws_montly_params)
+        monthly_costs = costquerier.get_cost_data(path=costquerier.AWS_COST_ENDPONT, params=aws_monthly_params)
     else:
         continue
     meta = daily_costs.get("meta", {})
@@ -142,7 +142,7 @@ for email_item in email_list:
             f' {formatted_delta} {total["units"]}'
         )
 
-        monthly_data = montly_costs.get("data", [])
+        monthly_data = monthly_costs.get("data", [])
         accounts_data = monthly_data[0].get("accounts", [])
         account_breakdown = []
         for acct_data in accounts_data:
