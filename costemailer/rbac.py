@@ -54,7 +54,7 @@ def get_access(username, permissions):
                 def_value = definition.get("attributeFilter", {}).get("value")
                 def_operation = definition.get("attributeFilter", {}).get("operation")
                 if def_operation == "in":
-                    resources[access_perm] = resources[access_perm] + def_value.split(",")
+                    resources[access_perm] = resources[access_perm] + def_value
                 elif def_operation == "equal":
                     resources[access_perm].append(def_value)
     return resources
