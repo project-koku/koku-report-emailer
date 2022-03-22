@@ -77,6 +77,13 @@ objects:
             value: ${RBAC_API_PREFIX}
           - name: COST_MGMT_RECIPIENTS
             value: ${COST_MGMT_RECIPIENTS}
+        volumes:
+          - name: emailer-config
+            configMap:
+              name: koku-emailer-config
+        volumeMounts:
+          - name: emailer-config
+            mountPath: /data
         resources:
           requests:
             cpu: ${CPU_REQUEST}
