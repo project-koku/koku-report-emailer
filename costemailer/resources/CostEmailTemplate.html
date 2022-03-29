@@ -492,7 +492,7 @@
                               <th role="rowheader" scope="row">Amazon Web Services:</th>
                             </tr>
                             <tr>
-                              <td>Monthly Total: {{ aws_cost }} {{ units }}</td><td>Monthly Delta: {{ aws_cost_delta }} {{ units }}</td>
+                              <td>Monthly Total: {{ units }}{{ "{:,.2f}".format(aws_cost) }}</td><td>Monthly Delta: {{ units }}{{  "{:,.2f}".format(aws_cost) }} </td>
                             </tr>
                           </tbody>
                         </table>
@@ -504,7 +504,7 @@
                             </tr>
                             {% for item in aws_account_breakdown %}
                             <tr>
-                              <td>{{ item.account }}</td><td>{{ item.account_alias }}</td><td>{{'%0.2f' % item.cost.total.value|float}} {{ item.cost.total.units }}</td><td>{{'%0.2f' % item.delta_value|float}}</td>
+                              <td>{{ item.account }}</td><td>{{ item.account_alias }}</td><td>{{ units }}{{"{:,.2f}".format(item.cost.total.value)}}</td><td>{{ units }}{{"{:,.2f}".format(item.delta_value)}}</td>
                             </tr>
                             {% endfor %}
                           </tbody>
