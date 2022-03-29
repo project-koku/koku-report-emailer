@@ -9,6 +9,7 @@ from email.mime.text import MIMEText
 from pathlib import Path
 
 from costemailer import costquerier
+from costemailer import CURRENCY_SYMBOLS_MAP
 from costemailer.charting import plot_data
 from costemailer.config import Config
 from costemailer.rbac import AWS_ACCOUNT_ACCESS
@@ -155,11 +156,11 @@ for email_item in email_list:
         email_template = Template(EMAIL_TEMPLATE_CONTENT)
         template_variables = {
             "cost_timeframe": current_month,
-            "aws_cost": formatted_total,
-            "aws_cost_delta": formatted_delta,
+            "aws_cost": float(formatted_total),
+            "aws_cost_delta": float(formatted_delta),
             "aws_account_breakdown": account_breakdown,
             "web_url": PRODUCTION_ENDPOINT,
-            "units": total["units"],
+            "units": CURRENCY_SYMBOLS_MAP.get(total["units"]),
             "aws_img_index": 1,
         }
         for img_path in img_paths:
