@@ -503,9 +503,15 @@
                               <th role="rowheader">Account</th><th role="rowheader">Account Alias</th><th  style="text-align: right">Monthly Total</th><th style="text-align: right">Monthly Delta</th>
                             </tr>
                             {% for item in aws_account_breakdown %}
+                            {% if item.delta_value > 0 %}
+                            <tr>
+                              <td>{{ item.account }}</td><td>{{ item.account_alias }}</td><td align="right">{{ units }}{{"{:,.2f}".format(item.cost.total.value)}}</td><td align="right" style="color:red">{{ units }}{{"{:,.2f}".format(item.delta_value)}}</td>
+                            </tr>
+                            {% else %}
                             <tr>
                               <td>{{ item.account }}</td><td>{{ item.account_alias }}</td><td align="right">{{ units }}{{"{:,.2f}".format(item.cost.total.value)}}</td><td align="right">{{ units }}{{"{:,.2f}".format(item.delta_value)}}</td>
                             </tr>
+                            {% endif %}
                             {% endfor %}
                           </tbody>
                         </table>

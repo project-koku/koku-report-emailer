@@ -152,6 +152,7 @@ for email_item in email_list:
             print(
                 f"{acct_datum.get('account')}/{acct_datum.get('account_alias')}: {acct_datum.get('cost',{}).get('total')} ({acct_datum.get('delta_value')})"
             )
+        account_breakdown = sorted(account_breakdown, key=lambda i: i["delta_value"], reverse=True)
 
         email_template = Template(EMAIL_TEMPLATE_CONTENT)
         template_variables = {
