@@ -4,7 +4,9 @@ from .config import Config
 
 
 AWS_COST_ENDPONT = "reports/aws/costs/"
-CURRENT_MONTH_PARAMS = {"filter[time_scope_units]": "month", "filter[time_scope_value]": "-1", "delta": "cost"}
+AWS_ORG_UNIT_ENDPONT = "organizations/aws/"
+CURRENT_MONTH_PARAMS = {"filter[time_scope_units]": "month", "filter[time_scope_value]": "-1", "limit": "1000"}
+CURRENT_COST_MONTH_PARAMS = {"filter[time_scope_units]": "month", "filter[time_scope_value]": "-1", "delta": "cost"}
 
 
 def get_cost_data(path="status/", params={}):
@@ -19,5 +21,7 @@ def get_cost_data(path="status/", params={}):
         and "application/json" in response.headers["content-type"]
     ):
         return response.json()
+    else:
+        print(response.text)
 
     return {}
