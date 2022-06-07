@@ -68,7 +68,9 @@ def get_org_level(parent_org, aws_orgs_access, all_aws_orgs):
         return org_level
     parent_org_dict = all_aws_orgs.get(parent_org, {})
     next_parent = parent_org_dict.get("parent")
-    return 1 + get_org_level(next_parent, aws_orgs_access, all_aws_orgs)
+    if next_parent:
+        org_level = 1 + get_org_level(next_parent, aws_orgs_access, all_aws_orgs)
+    return org_level
 
 
 def construct_parent_org(parent_org, aws_orgs_access, all_aws_orgs, org_values):
@@ -81,7 +83,7 @@ def construct_parent_org(parent_org, aws_orgs_access, all_aws_orgs, org_values):
     if parent_org in aws_orgs_access:
         next_parent = None
     else:
-        level = get_org_level(next_parent, aws_orgs_access, all_aws_orgs)
+        level = 1 + get_org_level(next_parent, aws_orgs_access, all_aws_orgs)
 
     parent_org_cost_dict = {
         "org_unit_id": parent_org,
@@ -231,8 +233,10 @@ for email_item in email_list:  # noqa C901
 
             aws_org = {}
             cur_org_unit_id = aws_accounts_in_ou.get(account_alias)
+            cur_org_unit_name = None
             if cur_org_unit_id:
                 aws_org = org_units.get(cur_org_unit_id, {})
+                cur_org_unit_name = aws_org.get("org_unit_name")
 
             account_dict = {
                 "account": account_id,
@@ -249,10 +253,12 @@ for email_item in email_list:  # noqa C901
                     accounts_in_ous[cur_org_unit_id] = []
                 accounts_in_ous[cur_org_unit_id].append(account_dict)
                 parent_org_id = aws_org.get("parent_org")
-                org_level = 1 + get_org_level(parent_org_id, aws_orgs_access, org_units)
+                org_level = 0
+                if cur_org_unit_id not in aws_orgs_access:
+                    org_level = 1 + get_org_level(parent_org_id, aws_orgs_access, org_units)
                 org_dict = {
                     "org_unit_id": cur_org_unit_id,
-                    "org_unit_name": aws_org.get("org_unit_name"),
+                    "org_unit_name": cur_org_unit_name,
                     "parent_org": parent_org_id,
                     "level": org_level,
                     "cost": account_monthly_cost,
@@ -266,9 +272,10 @@ for email_item in email_list:  # noqa C901
                     org_dict["delta"] = cur_org_value.get("delta", 0) + org_dict.get("delta", 0)
                     org_values[cur_org_unit_id] = org_dict
 
-                parent_org = aws_org.get("parent_org")
-                while parent_org:
-                    parent_org = construct_parent_org(parent_org, aws_orgs_access, org_units, org_values)
+                if cur_org_unit_id not in aws_orgs_access:
+                    parent_org = aws_org.get("parent_org")
+                    while parent_org:
+                        parent_org = construct_parent_org(parent_org, aws_orgs_access, org_units, org_values)
 
         org_level = 5
         for i in range(org_level, -1, -1):
