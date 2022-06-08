@@ -67,7 +67,7 @@ def get_org_level(parent_org, aws_orgs_access, all_aws_orgs):
     if not parent_org or parent_org in aws_orgs_access:
         return org_level
     parent_org_dict = all_aws_orgs.get(parent_org, {})
-    next_parent = parent_org_dict.get("parent")
+    next_parent = parent_org_dict.get("parent_org")
     if next_parent:
         org_level = 1 + get_org_level(next_parent, aws_orgs_access, all_aws_orgs)
     return org_level
