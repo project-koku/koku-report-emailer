@@ -215,7 +215,7 @@ for email_item in email_list:  # noqa C901
             f' {formatted_delta} {total["units"]}'
         )
 
-        monthly_data = monthly_costs.get("data", [])
+        monthly_data = monthly_costs.get("data", [{}])
         accounts_data = monthly_data[0].get("accounts", [])
         orgs_in_ous = {}
         accounts_in_ous = {}
