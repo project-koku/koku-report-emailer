@@ -19,7 +19,7 @@ from costemailer.rbac import get_users
 from jinja2 import Template
 
 
-PRODUCTION_ENDPOINT = "https://cloud.redhat.com"
+PRODUCTION_ENDPOINT = "https://console.redhat.com"
 REL_TEMPLATE_PATH = "costemailer/resources/CostEmailTemplate.html"
 REL_LOGO_PATH = "costemailer/resources/Logo-Red_Hat-cost-management-RGB.png"
 LOGO_PATH = Path(__file__).parent / REL_LOGO_PATH
@@ -42,7 +42,7 @@ def email(recipients, content=EMAIL_TEMPLATE_CONTENT, attachments=None):
 
     msg = MIMEMultipart()
     sender = "cost-mgmt@redhat.com"
-    subject = f"Cost Management Report: {today}"
+    subject = f"AWS Cost Management Report: {today}"
     msg_text = content
     msg["Subject"] = subject
     msg["From"] = sender
