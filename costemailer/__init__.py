@@ -1,3 +1,17 @@
+from pathlib import Path
+
+
+DEFAULT_REPORT_TYPE = "AWS"
+DEFAULT_REPORT_ISO_DAYS = [1, 3, 5]
+PRODUCTION_ENDPOINT = "https://console.redhat.com"
+REL_AWS_TEMPLATE_PATH = "resources/AwsCostEmailTemplate.html"
+REL_OPENSHIFT_TEMPLATE_PATH = "resources/OpenShiftCostEmailTemplate.html"
+REL_LOGO_PATH = "resources/Logo-Red_Hat-cost-management-RGB.png"
+LOGO_PATH = Path(__file__).parent / REL_LOGO_PATH
+EMAIL_TEMPLATE_PATH = {
+    "AWS": Path(__file__).parent / REL_AWS_TEMPLATE_PATH,
+    "OCP": Path(__file__).parent / REL_OPENSHIFT_TEMPLATE_PATH,
+}
 CURRENCY_SYMBOLS_MAP = {
     "AED": "د.إ",
     "AFN": "؋",
@@ -173,3 +187,8 @@ CURRENCY_SYMBOLS_MAP = {
     "ZAR": "R",
     "ZWD": "Z$",
 }
+
+
+def get_email_content(report_type):
+    with open(EMAIL_TEMPLATE_PATH.get(report_type)) as email_template:
+        return email_template.read()
