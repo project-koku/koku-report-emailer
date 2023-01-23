@@ -27,20 +27,25 @@ for user in account_users:
         user_access = get_access(
             username, [AWS_ACCOUNT_ACCESS, AWS_ORG_ACCESS, OPENSHIFT_CLUSTER_ACCESS, OPENSHIFT_PROJECT_ACCESS]
         )
-        report_filter = Config.COST_MGMT_RECIPIENTS.get(username, {}).get("filter", {})
-        report_schedule = Config.COST_MGMT_RECIPIENTS.get(username, {}).get("schedule", DEFAULT_REPORT_ISO_DAYS)
-        user_info = {
-            "user": user,
-            "aws.account": user_access[AWS_ACCOUNT_ACCESS],
-            "aws.organizational_unit": user_access[AWS_ORG_ACCESS],
-            "openshift.cluster": user_access[OPENSHIFT_CLUSTER_ACCESS],
-            "openshift.project": user_access[OPENSHIFT_PROJECT_ACCESS],
-            "cc": cc_list,
-            "report_type": report_type,
-            "filter": report_filter,
-            "schedule": report_schedule,
-        }
-        email_list.append(user_info)
+        reports_list = Config.COST_MGMT_RECIPIENTS.get(username, {}).get("reports", [])
+        if not reports_list:
+            reports_list.append(Config.COST_MGMT_RECIPIENTS.get(username, {}))
+
+        for report in reports_list:
+            report_filter = report.get("filter", {})
+            report_schedule = report.get("schedule", DEFAULT_REPORT_ISO_DAYS)
+            report_info = {
+                "user": user,
+                "aws.account": user_access[AWS_ACCOUNT_ACCESS],
+                "aws.organizational_unit": user_access[AWS_ORG_ACCESS],
+                "openshift.cluster": user_access[OPENSHIFT_CLUSTER_ACCESS],
+                "openshift.project": user_access[OPENSHIFT_PROJECT_ACCESS],
+                "cc": cc_list,
+                "report_type": report_type,
+                "filter": report_filter,
+                "schedule": report_schedule,
+            }
+            email_list.append(report_info)
 
 aws_orgs_monthly_params = costquerier.CURRENT_MONTH_PARAMS.copy()
 org_units_response = costquerier.get_cost_data(path=costquerier.AWS_ORG_UNIT_ENDPOINT, params=aws_orgs_monthly_params)

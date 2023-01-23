@@ -67,6 +67,9 @@ def apply_cost_to_parent_ou(parent_org, org_dict, org_values, orgs_in_ous, accou
 def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
     report_type = email_item.get("report_type", DEFAULT_REPORT_TYPE)
     report_schedule = email_item.get("schedule", DEFAULT_REPORT_ISO_DAYS)
+    report_filter = email_item.get("filter", {})
+    filtered_accounts = report_filter.get("accounts", [])
+    filtered_orgs = report_filter.get("orgs", [])
     aws_accounts_in_ou = kwargs.get("aws_accounts_in_ou", {})
     org_units = kwargs.get("org_units", {})
     print(f"User info: {email_item}.")
@@ -75,6 +78,18 @@ def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
     is_org_admin = email_item.get("user", {}).get("is_org_admin", False)
     aws_accounts = email_item.get("aws.account", [])
     aws_orgs_access = email_item.get("aws.organizational_unit", [])
+
+    if filtered_orgs:
+        if aws_orgs_access:
+            aws_orgs_access = list(set(aws_orgs_access).intersection(filtered_orgs))
+        else:
+            aws_orgs_access = filtered_orgs
+    if filtered_accounts:
+        if aws_accounts:
+            aws_accounts = list(set(aws_accounts).intersection(filtered_accounts))
+        else:
+            aws_accounts = filtered_accounts
+
     daily_costs = {}
     monthly_costs = {}
     if not is_org_admin and not (len(aws_accounts) or len(aws_orgs_access)):
@@ -151,6 +166,8 @@ def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
                 "delta": account_monthly_delta,
                 "parent": cur_org_unit_id,
             }
+            if aws_accounts and account_id not in aws_accounts:
+                continue
 
             if not aws_org:
                 accounts_not_in_ous.append(account_dict)

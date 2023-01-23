@@ -27,12 +27,16 @@ def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
     openshift_clusters = email_item.get("openshift.cluster", [])
     openshift_projects = email_item.get("openshift.project", [])
 
-    if openshift_clusters:
-        openshift_clusters = list(set(openshift_clusters).intersection(filtered_clusters))
-    if openshift_projects:
-        openshift_projects = list(set(openshift_projects).intersection(filtered_projects))
-    else:
-        openshift_projects = filtered_projects
+    if filtered_clusters:
+        if openshift_clusters:
+            openshift_clusters = list(set(openshift_clusters).intersection(filtered_clusters))
+        else:
+            openshift_clusters = filtered_clusters
+    if filtered_projects:
+        if openshift_projects:
+            openshift_projects = list(set(openshift_projects).intersection(filtered_projects))
+        else:
+            openshift_projects = filtered_projects
 
     daily_costs = {}
     monthly_costs = {}
