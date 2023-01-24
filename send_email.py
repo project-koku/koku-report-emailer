@@ -34,13 +34,14 @@ for user in account_users:
         for report in reports_list:
             report_filter = report.get("filter", {})
             report_schedule = report.get("schedule", DEFAULT_REPORT_ISO_DAYS)
+            report_cc = report.get("cc", [])
             report_info = {
                 "user": user,
                 "aws.account": user_access[AWS_ACCOUNT_ACCESS],
                 "aws.organizational_unit": user_access[AWS_ORG_ACCESS],
                 "openshift.cluster": user_access[OPENSHIFT_CLUSTER_ACCESS],
                 "openshift.project": user_access[OPENSHIFT_PROJECT_ACCESS],
-                "cc": cc_list,
+                "cc": cc_list + report_cc,
                 "report_type": report_type,
                 "filter": report_filter,
                 "schedule": report_schedule,
