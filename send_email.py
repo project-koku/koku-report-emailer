@@ -22,7 +22,7 @@ for user in account_users:
     if username in Config.COST_MGMT_RECIPIENTS.keys():
         user_email = user.get("email")
         cc_list = Config.COST_MGMT_RECIPIENTS.get(username, {}).get("cc", [])
-        print(f"User {username} is in recipient list with email {user_email} and cc list {cc_list}.")
+        print(f"User {username} is in recipient list with email {user_email}.")
         report_type = Config.COST_MGMT_RECIPIENTS.get(username, {}).get("report_type", DEFAULT_REPORT_TYPE)
         user_access = get_access(
             username, [AWS_ACCOUNT_ACCESS, AWS_ORG_ACCESS, OPENSHIFT_CLUSTER_ACCESS, OPENSHIFT_PROJECT_ACCESS]
@@ -35,6 +35,7 @@ for user in account_users:
             report_filter = report.get("filter", {})
             report_schedule = report.get("schedule", DEFAULT_REPORT_ISO_DAYS)
             report_cc = report.get("cc", [])
+            report_type_item = report.get("report_type", report_type)
             report_info = {
                 "user": user,
                 "aws.account": user_access[AWS_ACCOUNT_ACCESS],
@@ -42,7 +43,7 @@ for user in account_users:
                 "openshift.cluster": user_access[OPENSHIFT_CLUSTER_ACCESS],
                 "openshift.project": user_access[OPENSHIFT_PROJECT_ACCESS],
                 "cc": cc_list + report_cc,
-                "report_type": report_type,
+                "report_type": report_type_item,
                 "filter": report_filter,
                 "schedule": report_schedule,
             }
