@@ -98,6 +98,8 @@ def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
                     if fc in proj_datum.get("clusters", []):
                         project_breakdown.append(proj_datum)
                     break
+            else:
+                project_breakdown.append(proj_datum)
 
         project_breakdown = sorted(project_breakdown, key=lambda i: i["delta_value"], reverse=True)
 
