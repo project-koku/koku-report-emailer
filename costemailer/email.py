@@ -1,4 +1,6 @@
+import random
 import smtplib
+import time
 from datetime import datetime
 from email.encoders import encode_base64
 from email.mime.base import MIMEBase
@@ -58,4 +60,9 @@ def email(
             except Exception as err:  # noqa: E722
                 print(f"Could not attach file: {err}")
     msg.attach(MIMEText(msg_text, "html"))
-    s.sendmail(sender, recipients, msg.as_string())
+    try:
+        time.sleep(random.randint(1, 5))
+        s.sendmail(sender, recipients, msg.as_string())
+    except Exception as e:
+        print(e)
+        time.sleep(random.randint(15, 60))
