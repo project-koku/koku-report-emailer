@@ -3,6 +3,7 @@ from pathlib import Path
 
 DEFAULT_REPORT_TYPE = "AWS"
 DEFAULT_REPORT_ISO_DAYS = [1, 3, 5]
+DEFAULT_ORDER = "delta"
 PRODUCTION_ENDPOINT = "https://console.redhat.com"
 REL_AWS_TEMPLATE_PATH = "resources/AwsCostEmailTemplate.html"
 REL_OPENSHIFT_TEMPLATE_PATH = "resources/OpenShiftCostEmailTemplate.html"
