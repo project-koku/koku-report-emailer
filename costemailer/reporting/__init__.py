@@ -18,8 +18,8 @@ def get_monthly_cost(report_type, params={}, is_org_admin=False):
     api_endpoint = API_ENDPOINTS.get(report_type)
     monthly_params = costquerier.CURRENT_COST_MONTH_PARAMS.copy()
     monthly_params["filter[resolution]"] = "monthly"
-
-    if not is_org_admin:
-        monthly_params.update(params)
+    monthly_params.update(params)
+    # if not is_org_admin:
+    #     monthly_params.update(params)
 
     return costquerier.get_cost_data(path=api_endpoint, params=monthly_params)
