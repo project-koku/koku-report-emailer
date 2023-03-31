@@ -105,6 +105,7 @@ def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
     daily_costs = {}
     monthly_costs = {}
     if not is_org_admin and not (len(aws_accounts) or len(aws_orgs_access)):
+        print("User has no access.")
         return
 
     monthly_params = {"group_by[account]": "*"}
@@ -261,6 +262,10 @@ def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
         accounts_not_in_ous = sorted(accounts_not_in_ous, key=lambda i: i["delta"], reverse=True)
 
         account_breakdown = sorted(account_breakdown, key=lambda i: i["delta_value"], reverse=True)
+
+        print(f"org_values_list={len(org_values_list)}")
+        print(f"accounts_not_in_ous={len(accounts_not_in_ous)}")
+        print(f"account_breakdown={len(account_breakdown)}")
 
         email_template = Template(get_email_content(report_type))
         template_variables = {

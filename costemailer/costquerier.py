@@ -15,7 +15,7 @@ def get_cost_data(path="status/", params={}):
     api_call = Config.CLOUD_DOT_API_ROOT + Config.COST_MGMT_API_PREFIX + path
     credentials = (Config.CLOUD_DOT_USERNAME, Config.CLOUD_DOT_PASSWORD)
     response = requests.get(api_call, params=params, auth=credentials)
-
+    print(f"path={path}, params={params}, response.status_code={response.status_code}")
     if (
         response.status_code >= 200
         and response.status_code < 300
