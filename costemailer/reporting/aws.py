@@ -2,6 +2,7 @@ import os
 
 from costemailer import costquerier
 from costemailer import CURRENCY_SYMBOLS_MAP
+from costemailer import DEFAULT_ORDER
 from costemailer import DEFAULT_REPORT_ISO_DAYS
 from costemailer import DEFAULT_REPORT_TYPE
 from costemailer import get_email_content
@@ -49,19 +50,29 @@ def construct_parent_org(parent_org, aws_orgs_access, all_aws_orgs, org_values):
     return next_parent
 
 
+def apply_account_costs(org_dict, org_values, accounts_in_ous, debug=False):
+    org_name = org_dict.get("org_unit_name")
+    org_unit_id = org_dict.get("org_unit_id")
+    if debug:
+        print(f"org={org_name}")
+    for acct in accounts_in_ous.get(org_unit_id, []):
+        org_dict["cost"] = org_dict.get("cost", 0) + acct.get("cost", 0)
+        org_dict["delta"] = org_dict.get("delta", 0) + acct.get("delta", 0)
+        if debug:
+            print(f"acct={acct}")
+            print(f"org_dict={org_dict}")
+    return org_dict
+
+
 def apply_cost_to_parent_ou(parent_org, org_dict, org_values, orgs_in_ous, accounts_in_ous):
     parent_org_dict = org_values.get(parent_org, {})
     if parent_org_dict:
         parent_org_dict["cost"] = parent_org_dict.get("cost", 0) + org_dict.get("cost", 0)
         parent_org_dict["delta"] = parent_org_dict.get("delta", 0) + org_dict.get("delta", 0)
-        org_values[parent_org] = parent_org_dict
         if not orgs_in_ous.get(parent_org):
             orgs_in_ous[parent_org] = []
         orgs_in_ous[parent_org].append(org_dict)
-
-        for acct in accounts_in_ous.get(parent_org, []):
-            parent_org_dict["cost"] = parent_org_dict.get("cost", 0) + acct.get("cost", 0)
-            parent_org_dict["delta"] = parent_org_dict.get("delta", 0) + acct.get("delta", 0)
+        org_values[parent_org] = parent_org_dict
 
 
 def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
@@ -72,6 +83,7 @@ def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
     filtered_orgs = report_filter.get("orgs", [])
     aws_accounts_in_ou = kwargs.get("aws_accounts_in_ou", {})
     org_units = kwargs.get("org_units", {})
+    cost_order = email_item.get("order", DEFAULT_ORDER)
     print(f"User info: {email_item}.")
     curr_user_email = email_item.get("user", {}).get("email")
     email_addrs = [curr_user_email] + email_item.get("cc", [])
@@ -144,6 +156,8 @@ def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
         account_breakdown = []
         org_values = {}
         org_values_list = []
+        my_total = 0
+        my_delta = 0
         for acct_data in accounts_data:
             acct_datum = acct_data.get("values", [{}])[0]
             account_breakdown.append(acct_datum)
@@ -152,12 +166,17 @@ def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
             account_monthly_cost = acct_datum.get("cost", {}).get("total").get("value")
             account_monthly_delta = acct_datum.get("delta_value")
 
+            my_total += account_monthly_cost
+            my_delta += account_monthly_delta
+
             aws_org = {}
             cur_org_unit_id = aws_accounts_in_ou.get(account_alias)
             cur_org_unit_name = None
             if cur_org_unit_id:
                 aws_org = org_units.get(cur_org_unit_id, {})
                 cur_org_unit_name = aws_org.get("org_unit_name")
+            else:
+                print(f"{account_alias} not found in Org Units.")
 
             account_dict = {
                 "account": account_id,
@@ -201,6 +220,7 @@ def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
                         parent_org = construct_parent_org(parent_org, aws_orgs_access, org_units, org_values)
 
         org_level = 5
+        cur_org_level_list = []
         for i in range(org_level, -1, -1):
             cur_org_level_list = []
             for _, cur_org in org_values.items():
@@ -212,16 +232,20 @@ def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
                 the_parent_org = the_org.get("parent_org")
                 apply_cost_to_parent_ou(the_parent_org, the_org, org_values, orgs_in_ous, accounts_in_ous)
 
+        for the_org in cur_org_level_list:
+            the_org = apply_account_costs(the_org, org_values, accounts_in_ous)
+            org_values[the_org.get("org_unit_name")] = the_org
+
         for _, org_value in org_values.items():
             org_values_list.append(org_value)
-        org_values_list = sorted(org_values_list, key=lambda i: i["delta"], reverse=True)
+        org_values_list = sorted(org_values_list, key=lambda i: i[cost_order], reverse=True)
 
         for org_unit_id, org_list in orgs_in_ous.items():
-            org_list = sorted(org_list, key=lambda i: i["delta"], reverse=True)
+            org_list = sorted(org_list, key=lambda i: i[cost_order], reverse=True)
             orgs_in_ous[org_unit_id] = org_list
 
         for org_unit_id, acct_list in accounts_in_ous.items():
-            acct_list = sorted(acct_list, key=lambda i: i["delta"], reverse=True)
+            acct_list = sorted(acct_list, key=lambda i: i[cost_order], reverse=True)
             accounts_in_ous[org_unit_id] = acct_list
 
         for ov in org_values_list:
@@ -241,8 +265,8 @@ def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
         email_template = Template(get_email_content(report_type))
         template_variables = {
             "cost_timeframe": current_month,
-            "aws_cost": float(formatted_total),
-            "aws_cost_delta": float(formatted_delta),
+            "aws_cost": float(my_total),
+            "aws_cost_delta": float(my_delta),
             "aws_account_breakdown": account_breakdown,
             "aws_org_unit_list": org_values_list,
             "aws_orgs_in_ous": orgs_in_ous,

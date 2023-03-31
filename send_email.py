@@ -1,4 +1,5 @@
 from costemailer import costquerier
+from costemailer import DEFAULT_ORDER
 from costemailer import DEFAULT_REPORT_ISO_DAYS
 from costemailer import DEFAULT_REPORT_TYPE
 from costemailer import LOGO_PATH
@@ -36,6 +37,7 @@ for user in account_users:
             report_schedule = report.get("schedule", DEFAULT_REPORT_ISO_DAYS)
             report_cc = report.get("cc", [])
             report_type_item = report.get("report_type", report_type)
+            report_order = report.get("order", DEFAULT_ORDER)
             report_info = {
                 "user": user,
                 "aws.account": user_access[AWS_ACCOUNT_ACCESS],
@@ -46,6 +48,7 @@ for user in account_users:
                 "report_type": report_type_item,
                 "filter": report_filter,
                 "schedule": report_schedule,
+                "order": report_order,
             }
             email_list.append(report_info)
 
