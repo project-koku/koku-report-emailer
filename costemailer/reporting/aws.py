@@ -1,6 +1,7 @@
+import csv
 import os
+import tempfile
 
-from costemailer import costquerier
 from costemailer import CURRENCY_SYMBOLS_MAP
 from costemailer import DEFAULT_ORDER
 from costemailer import DEFAULT_REPORT_ISO_DAYS
@@ -286,6 +287,37 @@ def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
             template_variables[file_name] = file_name
         email_msg = email_template.render(**template_variables)
         subject = email_subject(report_type)
+
+        tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
+        with open(tmp.name, "w", newline="") as csvfile:
+            fieldnames = ["account", "account_alias", "cost", "delta", "org_unit"]
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+            writer.writeheader()
+            for _, accts in accounts_in_ous.items():
+                for acct in accts:
+                    writer.writerow(
+                        {
+                            "account": acct.get("account"),
+                            "account_alias": acct.get("account_alias"),
+                            "cost": acct.get("cost"),
+                            "delta": acct.get("delta"),
+                            "org_unit": acct.get("parent", ""),
+                        }
+                    )
+            for acct in accounts_not_in_ous:
+                writer.writerow(
+                    {
+                        "account": acct.get("account"),
+                        "account_alias": acct.get("account_alias"),
+                        "cost": acct.get("cost"),
+                        "delta": acct.get("delta"),
+                        "org_unit": acct.get("parent", ""),
+                    }
+                )
+        images.append(tmp)
+        img_paths.append(tmp.name)
+
         email(
             recipients=email_addrs,
             subject=subject,

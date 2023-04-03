@@ -1,4 +1,6 @@
+import csv
 import os
+import tempfile
 
 from costemailer import costquerier
 from costemailer import CURRENCY_SYMBOLS_MAP
@@ -118,6 +120,24 @@ def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
         template_variables[file_name] = file_name
     email_msg = email_template.render(**template_variables)
     subject = email_subject(report_type)
+
+    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
+    with open(tmp.name, "w", newline="") as csvfile:
+        fieldnames = ["project", "cost", "delta"]
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+        writer.writeheader()
+        for project in project_breakdown:
+            writer.writerow(
+                {
+                    "project": project.get("project"),
+                    "cost": project.get("cost", {}).get("total", {}).get("value"),
+                    "delta": project.get("delta_value"),
+                }
+            )
+    images.append(tmp)
+    img_paths.append(tmp.name)
+
     email(
         recipients=email_addrs,
         subject=subject,
