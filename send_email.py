@@ -1,5 +1,7 @@
 from costemailer import costquerier
+from costemailer import DEFAULT_ACCOUNT_LIMIT
 from costemailer import DEFAULT_ORDER
+from costemailer import DEFAULT_ORG_LEVEL_LIMIT
 from costemailer import DEFAULT_REPORT_ISO_DAYS
 from costemailer import DEFAULT_REPORT_TYPE
 from costemailer import LOGO_PATH
@@ -38,6 +40,8 @@ for user in account_users:
             report_cc = report.get("cc", [])
             report_type_item = report.get("report_type", report_type)
             report_order = report.get("order", DEFAULT_ORDER)
+            report_org_level_limit = report.get("org_level_limit", DEFAULT_ORG_LEVEL_LIMIT)
+            report_account_limit = report.get("account_limit", DEFAULT_ACCOUNT_LIMIT)
             report_info = {
                 "user": user,
                 "aws.account": user_access[AWS_ACCOUNT_ACCESS],
@@ -49,6 +53,8 @@ for user in account_users:
                 "filter": report_filter,
                 "schedule": report_schedule,
                 "order": report_order,
+                "org_level_limit": report_org_level_limit,
+                "account_limit": report_account_limit,
             }
             email_list.append(report_info)
 
