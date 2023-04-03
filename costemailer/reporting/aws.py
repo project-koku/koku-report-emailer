@@ -3,7 +3,9 @@ import os
 import tempfile
 
 from costemailer import CURRENCY_SYMBOLS_MAP
+from costemailer import DEFAULT_ACCOUNT_LIMIT
 from costemailer import DEFAULT_ORDER
+from costemailer import DEFAULT_ORG_LEVEL_LIMIT
 from costemailer import DEFAULT_REPORT_ISO_DAYS
 from costemailer import DEFAULT_REPORT_TYPE
 from costemailer import get_email_content
@@ -91,6 +93,8 @@ def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
     is_org_admin = email_item.get("user", {}).get("is_org_admin", False)
     aws_accounts = email_item.get("aws.account", [])
     aws_orgs_access = email_item.get("aws.organizational_unit", [])
+    org_level_limit = email_item.get("org_level_limit", DEFAULT_ORG_LEVEL_LIMIT)
+    account_limit = email_item.get("account_limit", DEFAULT_ACCOUNT_LIMIT)
 
     if filtered_orgs:
         if aws_orgs_access:
@@ -260,13 +264,21 @@ def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
             for acct in acct_list:
                 print(f"    {acct}")
 
-        accounts_not_in_ous = sorted(accounts_not_in_ous, key=lambda i: i["delta"], reverse=True)
+        accounts_not_in_ous = sorted(accounts_not_in_ous, key=lambda i: i[cost_order], reverse=True)
 
-        account_breakdown = sorted(account_breakdown, key=lambda i: i["delta_value"], reverse=True)
+        if cost_order == "delta":
+            account_breakdown = sorted(account_breakdown, key=lambda i: i["delta_value"], reverse=True)
+        else:
+            account_breakdown = sorted(account_breakdown, key=lambda i: i["cost"]["total"]["value"], reverse=True)
 
         print(f"org_values_list={len(org_values_list)}")
         print(f"accounts_not_in_ous={len(accounts_not_in_ous)}")
         print(f"account_breakdown={len(account_breakdown)}")
+
+        filtered_org_list = []
+        for org in org_values_list:
+            if org.get("level", 5) <= org_level_limit:
+                filtered_org_list.append(org)
 
         email_template = Template(get_email_content(report_type))
         template_variables = {
@@ -274,10 +286,11 @@ def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
             "aws_cost": float(my_total),
             "aws_cost_delta": float(my_delta),
             "aws_account_breakdown": account_breakdown,
-            "aws_org_unit_list": org_values_list,
+            "aws_org_unit_list": filtered_org_list,
             "aws_orgs_in_ous": orgs_in_ous,
             "aws_accounts_in_ous": accounts_in_ous,
             "aws_accounts_not_in_ous": accounts_not_in_ous,
+            "account_limit": account_limit,
             "web_url": PRODUCTION_ENDPOINT,
             "units": CURRENCY_SYMBOLS_MAP.get(total["units"]),
             "aws_img_index": 1,

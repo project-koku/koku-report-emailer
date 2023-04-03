@@ -4,6 +4,7 @@ import tempfile
 
 from costemailer import costquerier
 from costemailer import CURRENCY_SYMBOLS_MAP
+from costemailer import DEFAULT_ORDER
 from costemailer import DEFAULT_REPORT_ISO_DAYS
 from costemailer import DEFAULT_REPORT_TYPE
 from costemailer import get_email_content
@@ -28,6 +29,7 @@ def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
     is_org_admin = email_item.get("user", {}).get("is_org_admin", False)
     openshift_clusters = email_item.get("openshift.cluster", [])
     openshift_projects = email_item.get("openshift.project", [])
+    cost_order = email_item.get("order", DEFAULT_ORDER)
 
     if filtered_clusters:
         if openshift_clusters:
@@ -102,8 +104,10 @@ def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
                     break
             else:
                 project_breakdown.append(proj_datum)
-
-        project_breakdown = sorted(project_breakdown, key=lambda i: i["delta_value"], reverse=True)
+        if cost_order == "delta":
+            project_breakdown = sorted(project_breakdown, key=lambda i: i["delta_value"], reverse=True)
+        else:
+            project_breakdown = sorted(project_breakdown, key=lambda i: i["cost"]["total"]["value"], reverse=True)
 
     email_template = Template(get_email_content(report_type))
     template_variables = {
