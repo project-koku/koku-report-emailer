@@ -6,6 +6,7 @@ from email.encoders import encode_base64
 from email.mime.base import MIMEBase
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
+from email.mime.nonmultipart import MIMENonMultipart
 from email.mime.text import MIMEText
 
 from costemailer import DEFAULT_REPORT_ISO_DAYS
@@ -53,9 +54,16 @@ def email(
         for each_file_path in attachments:
             try:
                 file_name = each_file_path.split("/")[-1]
-                msgImage = MIMEImage(open(each_file_path, "rb").read(), filename=file_name)
-                msgImage.add_header("Content-ID", f"<image{attach_count}>")
-                msg.attach(msgImage)
+                if ".csv" in file_name:
+                    # Create the attachment of the message in text/csv.
+                    textFile = MIMENonMultipart("text", "csv", charset="utf-8")
+                    textFile.add_header("Content-Disposition", "attachment", filename=file_name)
+                    textFile.set_payload(open(each_file_path, "r").read())
+                    msg.attach(textFile)
+                else:
+                    msgImage = MIMEImage(open(each_file_path, "rb").read(), filename=file_name)
+                    msgImage.add_header("Content-ID", f"<image{attach_count}>")
+                    msg.attach(msgImage)
                 attach_count += 1
             except Exception as err:  # noqa: E722
                 print(f"Could not attach file: {err}")
