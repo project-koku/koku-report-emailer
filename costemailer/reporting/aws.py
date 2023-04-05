@@ -276,9 +276,13 @@ def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
         print(f"account_breakdown={len(account_breakdown)}")
 
         filtered_org_list = []
+        unique_org_list = []
         for org in org_values_list:
-            if org.get("level", 5) <= org_level_limit:
-                filtered_org_list.append(org)
+            org_unit_id = org.get("org_unit_id")
+            if org_unit_id not in unique_org_list:
+                unique_org_list.append(org_unit_id)
+                if org.get("level", 5) <= org_level_limit:
+                    filtered_org_list.append(org)
 
         email_template = Template(get_email_content(report_type))
         template_variables = {
