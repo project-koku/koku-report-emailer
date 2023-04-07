@@ -23,6 +23,7 @@ def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
     report_filter = email_item.get("filter", {})
     filtered_clusters = report_filter.get("clusters", [])
     filtered_projects = report_filter.get("projects", [])
+    filtered_accounts = report_filter.get("accounts", [])
     print(f"User info: {email_item}.")
     curr_user_email = email_item.get("user", {}).get("email")
     email_addrs = [curr_user_email] + email_item.get("cc", [])
@@ -109,12 +110,39 @@ def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
         else:
             project_breakdown = sorted(project_breakdown, key=lambda i: i["cost"]["total"]["value"], reverse=True)
 
+        openshift_project_aws_service_cost = {}
+        if openshift_projects:
+            for project in openshift_projects:
+                aws_services_monthly_params = {
+                    "group_by[service]": "*",
+                    "filter[account]": filtered_accounts,
+                    "filter[tag:namespace]": project,
+                }
+
+                aws_services_monthly_costs = get_monthly_cost(
+                    report_type="AWS", params=aws_services_monthly_params, is_org_admin=is_org_admin
+                )
+                aws_monthly_data = aws_services_monthly_costs.get("data", [])
+                if aws_monthly_data:
+                    aws_cur_month_services = aws_monthly_data[0].get("services", [])
+                    for aws_service in aws_cur_month_services:
+                        service_name = aws_service.get("service")
+                        service_values = aws_service.get("values", [])
+                        if service_values:
+                            service_delta = service_values[0].get("delta_value")
+                            service_cost = service_values[0].get("cost", {}).get("total", {}).get("value", 0)
+                            service_dict = {"name": service_name, "cost": service_cost, "delta": service_delta}
+                            if not openshift_project_aws_service_cost.get(project):
+                                openshift_project_aws_service_cost[project] = []
+                            openshift_project_aws_service_cost.get(project).append(service_dict)
+
     email_template = Template(get_email_content(report_type))
     template_variables = {
         "cost_timeframe": current_month,
         "openshift_cost": float(formatted_total),
         "openshift_cost_delta": float(formatted_delta),
         "openshift_project_breakdown": project_breakdown,
+        "openshift_project_aws_breakdown": openshift_project_aws_service_cost,
         "web_url": PRODUCTION_ENDPOINT,
         "units": CURRENCY_SYMBOLS_MAP.get(total["units"]),
         "openshift_img_index": 1,
@@ -139,6 +167,25 @@ def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
                     "delta": project.get("delta_value"),
                 }
             )
+    images.append(tmp)
+    img_paths.append(tmp.name)
+
+    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
+    with open(tmp.name, "w", newline="") as csvfile:
+        fieldnames = ["project", "aws_service", "cost", "delta"]
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+        writer.writeheader()
+        for project, services in openshift_project_aws_service_cost.items():
+            for service in services:
+                writer.writerow(
+                    {
+                        "project": project,
+                        "aws_service": service.get("name"),
+                        "cost": service.get("cost"),
+                        "delta": service.get("delta"),
+                    }
+                )
     images.append(tmp)
     img_paths.append(tmp.name)
 
