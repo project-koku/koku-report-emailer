@@ -53,11 +53,10 @@ def construct_parent_org(parent_org, aws_orgs_access, all_aws_orgs, org_values):
     return next_parent
 
 
-def apply_account_costs(org_dict, org_values, accounts_in_ous, debug=False):
-    org_name = org_dict.get("org_unit_name")
+def apply_account_costs(org_dict, accounts_in_ous, debug=False):
     org_unit_id = org_dict.get("org_unit_id")
     if debug:
-        print(f"org={org_name}")
+        print(f"org={org_unit_id}")
     for acct in accounts_in_ous.get(org_unit_id, []):
         org_dict["cost"] = org_dict.get("cost", 0) + acct.get("cost", 0)
         org_dict["delta"] = org_dict.get("delta", 0) + acct.get("delta", 0)
@@ -67,13 +66,19 @@ def apply_account_costs(org_dict, org_values, accounts_in_ous, debug=False):
     return org_dict
 
 
-def apply_cost_to_parent_ou(parent_org, org_dict, org_values, orgs_in_ous, accounts_in_ous):
+def apply_cost_to_parent_ou(parent_org, org_dict, org_values, orgs_in_ous, debug=False):
     parent_org_dict = org_values.get(parent_org, {})
+    if debug:
+        print(f"org={org_dict.get('org_unit_id')}")
+        print(f"parent_org={parent_org}")
     if parent_org_dict:
         parent_org_dict["cost"] = parent_org_dict.get("cost", 0) + org_dict.get("cost", 0)
         parent_org_dict["delta"] = parent_org_dict.get("delta", 0) + org_dict.get("delta", 0)
         if not orgs_in_ous.get(parent_org):
             orgs_in_ous[parent_org] = []
+        if debug:
+            print(f"Adding {org_dict.get('org_unit_id')} to {parent_org} list.")
+            print(f"parent_org_dict={parent_org_dict}")
         orgs_in_ous[parent_org].append(org_dict)
         org_values[parent_org] = parent_org_dict
 
@@ -236,11 +241,7 @@ def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
 
             for the_org in cur_org_level_list:
                 the_parent_org = the_org.get("parent_org")
-                apply_cost_to_parent_ou(the_parent_org, the_org, org_values, orgs_in_ous, accounts_in_ous)
-
-        for the_org in cur_org_level_list:
-            the_org = apply_account_costs(the_org, org_values, accounts_in_ous)
-            org_values[the_org.get("org_unit_name")] = the_org
+                apply_cost_to_parent_ou(the_parent_org, the_org, org_values, orgs_in_ous)
 
         for _, org_value in org_values.items():
             org_values_list.append(org_value)
