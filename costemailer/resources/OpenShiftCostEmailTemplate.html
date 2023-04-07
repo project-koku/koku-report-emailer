@@ -503,7 +503,7 @@
                         <table class="rh-data-table">
                           <tbody>
                             <tr>
-                              <th role="rowheader">Project</th><th  style="text-align: right">Month-to-date Total</th><th style="text-align: right">Month-to-date Delta</th>
+                              <th role="rowheader">Project (AWS EC2)</th><th  style="text-align: right">Month-to-date Total</th><th style="text-align: right">Month-to-date Delta</th>
                             </tr>
                             {% for item in openshift_project_breakdown %}
                             {% if item.delta_value > 0 %}
@@ -513,6 +513,30 @@
                             {% else %}
                             <tr>
                               <td>{{ item.project }}</td><td align="right">{{ units }}{{"{:,.2f}".format(item.cost.total.value)}}</td><td align="right">{{ units }}{{"{:,.2f}".format(item.delta_value)}}</td>
+                            </tr>
+                            {% endif %}
+                            {% if item.project in openshift_project_aws_breakdown  %}
+                            <tr>
+                              <td colspan="3">
+                              <table class="rh-data-table" style="background-color:#F0F0F0;">
+                                <tbody>
+                                  <tr>
+                                    <th role="rowheader" style="padding-left: 20px;">Additional AWS Services ({{item.project}})</th><th  style="text-align: right">Month-to-date Total</th><th style="text-align: right">Month-to-date Delta</th>
+                                  </tr>
+                                  {% for service in openshift_project_aws_breakdown.get(item.project) %}
+                                    {% if service.delta > 0 %}
+                                      <tr>
+                                        <td style="padding-left: 20px;">{{ service.name }}</td><td align="right">{{ units }}{{"{:,.2f}".format(service.cost)}}</td><td align="right" style="color:red">{{ units }}{{"{:,.2f}".format(service.delta)}}</td>
+                                      </tr>
+                                    {% else %}
+                                      <tr>
+                                        <td style="padding-left: 20px;">{{ service.name }}</td><td align="right">{{ units }}{{"{:,.2f}".format(service.cost)}}</td><td align="right">{{ units }}{{"{:,.2f}".format(service.delta)}}</td>
+                                      </tr>
+                                    {% endif %}
+                                  {% endfor %}
+                                </tbody>
+                              </table>
+                            </td>
                             </tr>
                             {% endif %}
                             {% endfor %}
