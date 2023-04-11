@@ -12,6 +12,7 @@ objects:
   data:
     clouddot-user: ''
     clouddot-password: ''
+    ibmcloud-apikey: ''
   type: Opaque
 
 - apiVersion: v1
@@ -64,6 +65,12 @@ objects:
               secretKeyRef:
                 key: email_password
                 name: koku-daily-secret
+                optional: true
+          - name: IBM_CLOUD_API_KEY
+            valueFrom:
+              secretKeyRef:
+                key: ibmcloud-apikey
+                name: koku-report-emailer-secret
                 optional: true
           - name: CLOWDER_ENABLED
             value: ${CLOWDER_ENABLED}
