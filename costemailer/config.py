@@ -15,7 +15,9 @@ class Config:
 
     CLOUD_DOT_USERNAME = os.getenv("CLOUD_DOT_USERNAME")
     CLOUD_DOT_PASSWORD = os.getenv("CLOUD_DOT_PASSWORD")
-    CLOUD_DOT_API_ROOT = os.getenv("CLOUD_DOT_API_ROOT", "https://cloud.redhat.com/api/")
+    CLOUD_DOT_API_ROOT = os.getenv("CLOUD_DOT_API_ROOT", "https://console.redhat.com/api/")
+
+    IBM_CLOUD_API_KEY = os.getenv("IBM_CLOUD_API_KEY")
 
     COST_MGMT_RECIPIENTS = {}
     COST_MGMT_RECIPIENTS_FILE = os.getenv("COST_MGMT_RECIPIENTS_FILE", "/data/config.yaml")
