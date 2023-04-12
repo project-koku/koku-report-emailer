@@ -9,11 +9,13 @@ DEFAULT_ACCOUNT_LIMIT = 300
 PRODUCTION_ENDPOINT = "https://console.redhat.com"
 REL_AWS_TEMPLATE_PATH = "resources/AwsCostEmailTemplate.html"
 REL_OPENSHIFT_TEMPLATE_PATH = "resources/OpenShiftCostEmailTemplate.html"
+REL_IBMCLOUD_TEMPLATE_PATH = "resources/IBMCloudCostEmailTemplate.html"
 REL_LOGO_PATH = "resources/Logo-Red_Hat-cost-management-RGB.png"
 LOGO_PATH = Path(__file__).parent / REL_LOGO_PATH
 EMAIL_TEMPLATE_PATH = {
     "AWS": Path(__file__).parent / REL_AWS_TEMPLATE_PATH,
     "OCP": Path(__file__).parent / REL_OPENSHIFT_TEMPLATE_PATH,
+    "IBM": Path(__file__).parent / REL_IBMCLOUD_TEMPLATE_PATH,
 }
 CURRENCY_SYMBOLS_MAP = {
     "AED": "د.إ",

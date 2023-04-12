@@ -13,6 +13,7 @@ from costemailer.rbac import get_users
 from costemailer.rbac import OPENSHIFT_CLUSTER_ACCESS
 from costemailer.rbac import OPENSHIFT_PROJECT_ACCESS
 from costemailer.reporting.aws import email_report as aws_email_report
+from costemailer.reporting.ibm import email_report as ibm_email_report
 from costemailer.reporting.openshift import email_report as ocp_email_report
 
 
@@ -86,5 +87,7 @@ for email_item in email_list:  # noqa C901
         aws_email_report(email_item, images, img_paths, aws_accounts_in_ou=aws_accounts_in_ou, org_units=org_units)
     elif report_type == "OCP":
         ocp_email_report(email_item, images, img_paths)
+    elif report_type == "IBM":
+        ibm_email_report(email_item, images, img_paths)
     else:
         pass
