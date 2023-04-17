@@ -493,32 +493,35 @@
                               <tr>
                                 <td>Month-to-date Total: {{ units }}{{ "{:,.2f}".format(ibmcloud_cost) }}</td>
                               </tr>
+                              <tr>
+                                <td>Month-to-date Discounted Total: {{ units }}{{ "{:,.2f}".format(ibmcloud_discounted_cost) }}</td>
+                              </tr>
                             </tr>
                           </tbody>
                         </table>
                       </td>
                     </tr>
                     <tr>
-                      <table class="rh-data-table">
+                      <table class="rh-data-table" width=100%>
                         <tbody>
                           <tr>
-                            <th role="rowheader">Account Group</th><th style="text-align: right">Month-to-date Total</th>
+                            <th role="rowheader">Account Group</th><th style="text-align: right">Month-to-date Total</th><th style="text-align: right">Month-to-date Discounted Total</th>
                           </tr>
                           {% for group, item in ibmcloud_group_breakdown.items() %}
                           <tr>
-                            <td>{{ item.name }}</td><td align="right">{{ units }}{{"{:,.2f}".format(item.cost)}}</td>
+                            <td>{{ item.name }}</td><td align="right">{{ units }}{{"{:,.2f}".format(item.cost)}}</td><td align="right">{{ units }}{{"{:,.2f}".format(item.discounted_cost)}}</td>
                           </tr>
                           {% if item.name in ibmcloud_account_breakdown %}
                             <tr>
-                              <td colspan="2">
-                                <table class="rh-data-table" style="background-color:#F0F0F0;">
+                              <td colspan="3">
+                                <table class="rh-data-table" style="background-color:#F0F0F0;" width=100%>
                                   <tbody>
                                     <tr>
-                                      <th role="rowheader" style="padding-left: 100px;">Account</th><th style="text-align: right;padding-right: 100px;">Month-to-date Total</th>
+                                      <th role="rowheader" style="padding-left: 80px;">Account Name</th><th>Account ID</th><th style="text-align: right;">Month-to-date Total</th><th style="text-align: right;padding-right: 80px;">Month-to-date Discounted Total</th>
                                     </tr>
                                     {% for account in ibmcloud_account_breakdown.get(item.name) %}
                                     <tr>
-                                      <td style="padding-left: 100px;">{{ account.name }}</td><td align="right" style="padding-right: 100px;">{{ units }}{{"{:,.2f}".format(account.cost)}}</td>
+                                      <td style="padding-left: 80px;">{{ account.name }}</td><td>{{account.id}}</td><td align="right">{{ units }}{{"{:,.2f}".format(account.cost)}}</td><td align="right" style="padding-right: 80px;">{{ units }}{{"{:,.2f}".format(account.discounted_cost)}}</td>
                                     </tr>
                                     {% endfor %}
                                   </tbody>
