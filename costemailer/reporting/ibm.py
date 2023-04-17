@@ -1,6 +1,7 @@
 import csv
 import os
 import tempfile
+import time
 from datetime import date
 
 import requests
@@ -22,38 +23,47 @@ def get_current_month():
     return f"{date.today().year}-{date.today().month:02}"
 
 
-def get_bearer_token():
+def get_bearer_token(retry_count=0):
     """Obtain the bearer token."""
     api_call = "https://iam.cloud.ibm.com/identity/token"
     form_data = {"grant_type": "urn:ibm:params:oauth:grant-type:apikey", "apikey": Config.IBM_CLOUD_API_KEY}
     access_token = None
     response = requests.post(url=api_call, data=form_data)
-    if (
-        response.status_code >= 200
-        and response.status_code < 300
-        and "application/json" in response.headers["content-type"]
-    ):
-        access_token = response.json().get("access_token")
-    else:
-        print(response.text)
-
-    return access_token
-
-
-def get_data(api_call, field, default=[]):
-    token = get_bearer_token()
-    data = []
-    if token:
-        response = requests.get(url=api_call, headers={"Authorization": f"Bearer {token}"})
-        print(f"url={api_call}, response.status_code={response.status_code}")
+    if retry_count < 3:
         if (
             response.status_code >= 200
             and response.status_code < 300
             and "application/json" in response.headers["content-type"]
         ):
-            data = response.json().get(field, default)
+            access_token = response.json().get("access_token")
         else:
             print(response.text)
+            time.sleep(10)
+            return get_bearer_token(retry_count=retry_count + 1)
+
+    return access_token
+
+
+def get_data(api_call, field, default=[], params={}, retry_count=0):
+    token = get_bearer_token()
+    data = []
+    if token:
+        response = requests.get(url=api_call, headers={"Authorization": f"Bearer {token}"}, params=params)
+        print(f"url={api_call}, response.status_code={response.status_code}")
+
+        if retry_count < 3:
+            if (
+                response.status_code >= 200
+                and response.status_code < 300
+                and "application/json" in response.headers["content-type"]
+            ):
+                data = response.json().get(field, default)
+            else:
+                print(response.text)
+                time.sleep(10)
+                return get_data(
+                    api_call=api_call, field=field, default=default, params=params, retry_count=retry_count + 1
+                )
 
     return data
 
@@ -62,8 +72,14 @@ def get_account_groups():
     return get_data(api_call="https://enterprise.cloud.ibm.com/v1/account-groups", field="resources")
 
 
-def get_accounts():
-    return get_data(api_call="https://enterprise.cloud.ibm.com/v1/accounts", field="resources")
+def get_accounts(account_groups_dict):
+    accounts = []
+    for ag_crn, _ in account_groups_dict.items():
+        results = get_data(
+            api_call="https://enterprise.cloud.ibm.com/v1/accounts", field="resources", params={"parent": ag_crn}
+        )
+        accounts += results
+    return accounts
 
 
 def get_account_costs(account_id):
@@ -89,7 +105,7 @@ def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
         account_groups_dict[ag.get("crn")] = ag
 
     accts_in_ag = {}
-    accounts = get_accounts()
+    accounts = get_accounts(account_groups_dict)
     for acct in accounts:
         account_group_crn = acct.get("parent")
         account_group_dict = account_groups_dict.get(account_group_crn, {})
@@ -111,28 +127,39 @@ def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
                 "id": acct.get("id"),
                 "name": acct.get("name"),
                 "cost": float(acct_costs.get("billable_rated_cost", 0)),
+                "discounted_cost": float(acct_costs.get("billable_cost", 0)),
                 "currency": acct_costs.get("currency_code", "USD"),
             }
             accts_in_ag[account_group_name].append(acct_dict)
 
     grand_total = 0
+    grand_discounted_total = 0
     report_currency = "USD"
     acct_grp_breakdown = {}
     for acct_grp, accts in accts_in_ag.items():
         total = 0
+        discounted_total = 0
         currency = "USD"
         for acct in accts:
+            discounted_total = float(discounted_total + acct.get("discounted_cost", 0))
             total = float(total + acct.get("cost", 0))
+            grand_discounted_total = float(grand_discounted_total + acct.get("discounted_cost", 0))
             grand_total = float(grand_total + acct.get("cost", 0))
             currency = acct.get("currency", "USD")
             report_currency = acct.get("currency", "USD")
 
-        acct_grp_breakdown[acct_grp] = {"name": acct_grp, "cost": total, "currency": currency}
+        acct_grp_breakdown[acct_grp] = {
+            "name": acct_grp,
+            "discounted_cost": discounted_total,
+            "cost": total,
+            "currency": currency,
+        }
 
     email_template = Template(get_email_content(report_type))
     template_variables = {
         "cost_timeframe": get_current_month(),
         "ibmcloud_cost": float(grand_total),
+        "ibmcloud_discounted_cost": float(grand_discounted_total),
         "ibmcloud_group_breakdown": acct_grp_breakdown,
         "ibmcloud_account_breakdown": accts_in_ag,
         "web_url": PRODUCTION_ENDPOINT,
