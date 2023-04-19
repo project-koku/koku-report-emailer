@@ -38,6 +38,7 @@ for user in account_users:
         for report in reports_list:
             report_filter = report.get("filter", {})
             report_schedule = report.get("schedule", DEFAULT_REPORT_ISO_DAYS)
+            report_view = report.get("view", "ou")
             report_cc = report.get("cc", [])
             report_type_item = report.get("report_type", report_type)
             report_order = report.get("order", DEFAULT_ORDER)
@@ -53,6 +54,7 @@ for user in account_users:
                 "report_type": report_type_item,
                 "filter": report_filter,
                 "schedule": report_schedule,
+                "view": report_view,
                 "order": report_order,
                 "org_level_limit": report_org_level_limit,
                 "account_limit": report_account_limit,
