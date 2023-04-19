@@ -493,66 +493,34 @@
                             </tr>
                             <tr>
                               <td>Month-to-date Total: {{ units }}{{ "{:,.2f}".format(aws_cost) }}</td>
-                              <!--
-                              <td>Month-to-date Delta: {{ units }}{{  "{:,.2f}".format(aws_cost_delta) }} </td>
-                              -->
                             </tr>
                           </tbody>
                         </table>
-
-                        <table class="rh-data-table">
+                      </td>
+                    </tr>
+                    <tr>
+                      {% if aws_cost_center_list | length > 0 %}
+                        <table class="rh-data-table" width=100%>
                           <tbody>
                             <tr>
-                              <th role="rowheader">Org Unit Name</th><th  style="text-align: right">Month-to-date Total</th><th style="text-align: right">Month-to-date Delta</th>
+                              <th role="rowheader">Cost Center</th><th  style="text-align: right">Month-to-date Total</th><th style="text-align: right">Month-to-date Delta</th>
                             </tr>
-                            {% for item in aws_org_unit_list %}
-                            {% if item.delta > 0 %}
+                            {% for item in aws_cost_center_list %}
                             <tr>
-                              <td>{{ item.org_unit_name }}</td><td align="right">{{ units }}{{"{:,.2f}".format(item.cost)}}</td><td align="right" style="color:red">{{ units }}{{"{:,.2f}".format(item.delta)}}</td>
+                              {% if item.delta > 0 %}
+                                <td>{{ item.name }}</td><td align="right">{{ units }}{{"{:,.2f}".format(item.cost)}}</td><td align="right" style="color:red">{{ units }}{{"{:,.2f}".format(item.delta)}}</td>
+                              {% else %}
+                                <td>{{ item.name }}</td><td align="right">{{ units }}{{"{:,.2f}".format(item.cost)}}</td><td align="right">{{ units }}{{"{:,.2f}".format(item.delta)}}</td>
+                              {% endif %}
                             </tr>
-                            {% else %}
-                            <tr >
-                              <td>{{ item.org_unit_name }}</td><td align="right">{{ units }}{{"{:,.2f}".format(item.cost)}}</td><td align="right">{{ units }}{{"{:,.2f}".format(item.delta)}}</td>
-                            </tr>
-                            {% endif %}
-
-                          {% if aws_orgs_in_ous.get(item.org_unit_id, [])|length > 0 %}
                             <tr>
-                              <td></td>
                               <td colspan="3">
-                                <table class="rh-data-table" style="background-color:#f0f0f0">
-                                  <tbody>
-                                    <tr>
-                                      <th role="rowheader">Org Unit Name</th><th  style="text-align: right">Month-to-date Total</th><th style="text-align: right">Month-to-date Delta</th>
-                                    </tr>
-                                    {% for org_data in aws_orgs_in_ous.get(item.org_unit_id, []) %}
-                                      {% if loop.index <= account_limit %}
-                                        {% if org_data.delta > 0 %}
-                                        <tr>
-                                          <td>{{ org_data.org_unit_name }}</td><td align="right">{{ units }}{{"{:,.2f}".format(org_data.cost)}}</td><td align="right" style="color:red">{{ units }}{{"{:,.2f}".format(org_data.delta)}}</td>
-                                        </tr>
-                                        {% else %}
-                                        <tr>
-                                          <td>{{ org_data.org_unit_name }}</td><td align="right">{{ units }}{{"{:,.2f}".format(org_data.cost)}}</td><td align="right">{{ units }}{{"{:,.2f}".format(org_data.delta)}}</td>
-                                        </tr>
-                                        {% endif %}
-                                      {% endif %}
-                                    {% endfor %}
-                                  </tbody>
-                                </table>
-                            </td>
-                          </tr>
-                          {% endif %}
-                          {% if aws_accounts_in_ous.get(item.org_unit_id, [])|length > 0 %}
-                            <tr>
-                              <td></td>
-                              <td colspan="3">
-                                <table class="rh-data-table" style="background-color:#f0f0f0">
+                                <table class="rh-data-table" style="background-color:#f0f0f0" width=100%>
                                   <tbody>
                                     <tr>
                                       <th role="rowheader">Account</th><th role="rowheader">Account Alias</th><th  style="text-align: right">Month-to-date Total</th><th style="text-align: right">Month-to-date Delta</th>
                                     </tr>
-                                    {% for acct in aws_accounts_in_ous.get(item.org_unit_id, []) %}
+                                    {% for acct in item.accounts %}
                                       {% if loop.index <= account_limit %}
                                         {% if acct.delta > 0 %}
                                         <tr>
@@ -567,59 +535,114 @@
                                     {% endfor %}
                                   </tbody>
                                 </table>
-                            </td>
+                              </td>
+                            </tr>
+                            {% endfor %}
+                          </tbody>
+                        </table>
+                      {% endif %}
+
+
+                      {% if aws_org_unit_list | length > 0 %}
+                      <table class="rh-data-table" width=100%>
+                        <tbody>
+                          <tr>
+                            <th role="rowheader">Org Unit Name</th><th  style="text-align: right">Month-to-date Total</th><th style="text-align: right">Month-to-date Delta</th>
+                          </tr>
+                          {% for item in aws_org_unit_list %}
+                          {% if item.delta > 0 %}
+                          <tr>
+                            <td>{{ item.org_unit_name }}</td><td align="right">{{ units }}{{"{:,.2f}".format(item.cost)}}</td><td align="right" style="color:red">{{ units }}{{"{:,.2f}".format(item.delta)}}</td>
+                          </tr>
+                          {% else %}
+                          <tr >
+                            <td>{{ item.org_unit_name }}</td><td align="right">{{ units }}{{"{:,.2f}".format(item.cost)}}</td><td align="right">{{ units }}{{"{:,.2f}".format(item.delta)}}</td>
                           </tr>
                           {% endif %}
 
-                            {% endfor %}
-                          </tbody>
-                        </table>
-
-                        {% if aws_accounts_not_in_ous|length > 0 %}
-                        <table class="rh-data-table">
-                          <tbody>
-                            <tr>
-                              <th role="rowheader">Account</th><th role="rowheader">Account Alias</th><th  style="text-align: right">Month-to-date Total</th><th style="text-align: right">Month-to-date Delta</th>
-                            </tr>
-                            {% for item in aws_accounts_not_in_ous %}
-                              {% if loop.index <= account_limit %}
-                                {% if item.delta > 0 %}
-                                <tr>
-                                  <td>{{ item.account }}</td><td>{{ item.account_alias }}</td><td align="right">{{ units }}{{"{:,.2f}".format(item.cost)}}</td><td align="right" style="color:red">{{ units }}{{"{:,.2f}".format(item.delta)}}</td>
-                                </tr>
-                                {% else %}
-                                <tr>
-                                  <td>{{ item.account }}</td><td>{{ item.account_alias }}</td><td align="right">{{ units }}{{"{:,.2f}".format(item.cost)}}</td><td align="right">{{ units }}{{"{:,.2f}".format(item.delta)}}</td>
-                                </tr>
-                                {% endif %}
-                              {% endif %}
-                            {% endfor %}
-                          </tbody>
-                        </table>
+                        {% if aws_orgs_in_ous.get(item.org_unit_id, [])|length > 0 %}
+                          <tr>
+                            <td></td>
+                            <td colspan="3">
+                              <table class="rh-data-table" style="background-color:#f0f0f0" width=100%>
+                                <tbody>
+                                  <tr>
+                                    <th role="rowheader">Org Unit Name</th><th  style="text-align: right">Month-to-date Total</th><th style="text-align: right">Month-to-date Delta</th>
+                                  </tr>
+                                  {% for org_data in aws_orgs_in_ous.get(item.org_unit_id, []) %}
+                                    {% if loop.index <= account_limit %}
+                                      {% if org_data.delta > 0 %}
+                                      <tr>
+                                        <td>{{ org_data.org_unit_name }}</td><td align="right">{{ units }}{{"{:,.2f}".format(org_data.cost)}}</td><td align="right" style="color:red">{{ units }}{{"{:,.2f}".format(org_data.delta)}}</td>
+                                      </tr>
+                                      {% else %}
+                                      <tr>
+                                        <td>{{ org_data.org_unit_name }}</td><td align="right">{{ units }}{{"{:,.2f}".format(org_data.cost)}}</td><td align="right">{{ units }}{{"{:,.2f}".format(org_data.delta)}}</td>
+                                      </tr>
+                                      {% endif %}
+                                    {% endif %}
+                                  {% endfor %}
+                                </tbody>
+                              </table>
+                          </td>
+                        </tr>
+                        {% endif %}
+                        {% if aws_accounts_in_ous.get(item.org_unit_id, [])|length > 0 %}
+                          <tr>
+                            <td></td>
+                            <td colspan="3">
+                              <table class="rh-data-table" style="background-color:#f0f0f0" width=100%>
+                                <tbody>
+                                  <tr>
+                                    <th role="rowheader">Account</th><th role="rowheader">Account Alias</th><th  style="text-align: right">Month-to-date Total</th><th style="text-align: right">Month-to-date Delta</th>
+                                  </tr>
+                                  {% for acct in aws_accounts_in_ous.get(item.org_unit_id, []) %}
+                                    {% if loop.index <= account_limit %}
+                                      {% if acct.delta > 0 %}
+                                      <tr>
+                                        <td>{{ acct.account }}</td><td>{{ acct.account_alias }}</td><td align="right">{{ units }}{{"{:,.2f}".format(acct.cost)}}</td><td align="right" style="color:red">{{ units }}{{"{:,.2f}".format(acct.delta)}}</td>
+                                      </tr>
+                                      {% else %}
+                                      <tr>
+                                        <td>{{ acct.account }}</td><td>{{ acct.account_alias }}</td><td align="right">{{ units }}{{"{:,.2f}".format(acct.cost)}}</td><td align="right">{{ units }}{{"{:,.2f}".format(acct.delta)}}</td>
+                                      </tr>
+                                      {% endif %}
+                                    {% endif %}
+                                  {% endfor %}
+                                </tbody>
+                              </table>
+                          </td>
+                        </tr>
                         {% endif %}
 
-                        <!--
-                        <table class="rh-data-table">
-                          <tbody>
-                            <tr>
-                              <th role="rowheader">Account</th><th role="rowheader">Account Alias</th><th  style="text-align: right">Month-to-date Total</th><th style="text-align: right">Month-to-date Delta</th>
-                            </tr>
-                            {% for item in aws_account_breakdown %}
-                            {% if item.delta_value > 0 %}
-                            <tr>
-                              <td>{{ item.account }}</td><td>{{ item.account_alias }}</td><td align="right">{{ units }}{{"{:,.2f}".format(item.cost.total.value)}}</td><td align="right" style="color:red">{{ units }}{{"{:,.2f}".format(item.delta_value)}}</td>
-                            </tr>
-                            {% else %}
-                            <tr>
-                              <td>{{ item.account }}</td><td>{{ item.account_alias }}</td><td align="right">{{ units }}{{"{:,.2f}".format(item.cost.total.value)}}</td><td align="right">{{ units }}{{"{:,.2f}".format(item.delta_value)}}</td>
-                            </tr>
-                            {% endif %}
-                            {% endfor %}
-                          </tbody>
-                        </table>
-                        -->
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                      {% endif %}
 
-                      </td>
+                      {% if aws_accounts_not_in_ous|length > 0 %}
+                      <table class="rh-data-table" width=100%>
+                        <tbody>
+                          <tr>
+                            <th role="rowheader">Account</th><th role="rowheader">Account Alias</th><th  style="text-align: right">Month-to-date Total</th><th style="text-align: right">Month-to-date Delta</th>
+                          </tr>
+                          {% for item in aws_accounts_not_in_ous %}
+                            {% if loop.index <= account_limit %}
+                              {% if item.delta > 0 %}
+                              <tr>
+                                <td>{{ item.account }}</td><td>{{ item.account_alias }}</td><td align="right">{{ units }}{{"{:,.2f}".format(item.cost)}}</td><td align="right" style="color:red">{{ units }}{{"{:,.2f}".format(item.delta)}}</td>
+                              </tr>
+                              {% else %}
+                              <tr>
+                                <td>{{ item.account }}</td><td>{{ item.account_alias }}</td><td align="right">{{ units }}{{"{:,.2f}".format(item.cost)}}</td><td align="right">{{ units }}{{"{:,.2f}".format(item.delta)}}</td>
+                              </tr>
+                              {% endif %}
+                            {% endif %}
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                      {% endif %}
+
                     </tr>
                     <tr>
                       <td style='text-align:center; vertical-align:middle'><img src="cid:image{{aws_img_index}}" class="center"></td>

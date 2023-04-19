@@ -7,6 +7,7 @@ from .config import Config
 
 AWS_COST_ENDPOINT = "reports/aws/costs/"
 AWS_ORG_UNIT_ENDPOINT = "organizations/aws/"
+AWS_COST_CATEGORIES_ENDPOINT = "resource-types/aws-categories/"
 OPENSHIFT_COST_ENDPOINT = "reports/openshift/costs/"
 CURRENT_MONTH_PARAMS = {"filter[time_scope_units]": "month", "filter[time_scope_value]": "-1", "limit": "1000"}
 CURRENT_COST_MONTH_PARAMS = {"filter[time_scope_units]": "month", "filter[time_scope_value]": "-1", "delta": "cost"}
