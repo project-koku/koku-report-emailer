@@ -155,6 +155,10 @@ def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
             "currency": currency,
         }
 
+    if grand_total == 0:
+        print("Total cost is 0, skip sending email.")
+        return
+
     email_template = Template(get_email_content(report_type))
     template_variables = {
         "cost_timeframe": get_current_month(),
