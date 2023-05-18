@@ -94,6 +94,7 @@ def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
     report_type = email_item.get("report_type", DEFAULT_REPORT_TYPE)
     report_schedule = email_item.get("schedule", DEFAULT_REPORT_ISO_DAYS)
     report_filter = email_item.get("filter", {})
+    report_title_suffix = email_item.get("title_suffix")
     filtered_accounts = report_filter.get("accounts", [])
     print(f"User info: {email_item}.")
     curr_user_email = email_item.get("user", {}).get("email")
@@ -174,6 +175,8 @@ def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
         template_variables[file_name] = file_name
     email_msg = email_template.render(**template_variables)
     subject = email_subject(report_type)
+    if report_title_suffix:
+        subject += f" [{report_title_suffix}]"
 
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
     with open(tmp.name, "w", newline="") as csvfile:
