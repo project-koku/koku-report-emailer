@@ -342,6 +342,7 @@ def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
     report_schedule = email_item.get("schedule", DEFAULT_REPORT_ISO_DAYS)
     report_view = email_item.get("view", DEFAULT_AWS_REPORT_VIEW)
     report_filter = email_item.get("filter", {})
+    report_title_suffix = email_item.get("title_suffix")
     filtered_accounts = report_filter.get("accounts", [])
     filtered_orgs = report_filter.get("orgs", [])
     filtered_cost_centers = report_filter.get("cost_centers", [])
@@ -450,6 +451,8 @@ def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
             )
 
         subject = email_subject(report_type)
+        if report_title_suffix:
+            subject += f" [{report_title_suffix}]"
 
         tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
         with open(tmp.name, "w", newline="") as csvfile:

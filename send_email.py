@@ -44,6 +44,7 @@ for user in account_users:
             report_order = report.get("order", DEFAULT_ORDER)
             report_org_level_limit = report.get("org_level_limit", DEFAULT_ORG_LEVEL_LIMIT)
             report_account_limit = report.get("account_limit", DEFAULT_ACCOUNT_LIMIT)
+            report_title_suffix = report.get("title_suffix")
             report_info = {
                 "user": user,
                 "aws.account": user_access[AWS_ACCOUNT_ACCESS],
@@ -58,6 +59,7 @@ for user in account_users:
                 "order": report_order,
                 "org_level_limit": report_org_level_limit,
                 "account_limit": report_account_limit,
+                "title_suffix": report_title_suffix,
             }
             email_list.append(report_info)
 
