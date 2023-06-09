@@ -380,7 +380,7 @@ def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
         if aws_accounts:
             daily_params["filter[account]"] = ",".join(aws_accounts)
             monthly_params["filter[account]"] = ",".join(aws_accounts)
-        if aws_orgs_access:
+        if aws_orgs_access and not filtered_cost_centers:
             daily_params["filter[org_unit_id]"] = ",".join(aws_orgs_access)
             monthly_params["filter[org_unit_id]"] = ",".join(aws_orgs_access)
         if filtered_cost_centers:
