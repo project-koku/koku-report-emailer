@@ -22,30 +22,30 @@ def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
     report_schedule = email_item.get("schedule", DEFAULT_REPORT_ISO_DAYS)
     report_filter = email_item.get("filter", {})
     report_title_suffix = email_item.get("title_suffix")
-    filtered_subscriptions = report_filter.get("subscriptions", [])
+    filtered_accounts = report_filter.get("gcp_accounts", [])
     print(f"User info: {email_item}.")
     curr_user_email = email_item.get("user", {}).get("email")
     email_addrs = [curr_user_email] + email_item.get("cc", [])
     is_org_admin = email_item.get("user", {}).get("is_org_admin", False)
-    azure_subscriptions = email_item.get("azure.subscription", [])
+    gcp_accounts = email_item.get("gcp.account", [])
     cost_order = email_item.get("order", DEFAULT_ORDER)
 
-    if filtered_subscriptions:
-        if azure_subscriptions:
-            azure_subscriptions = list(set(azure_subscriptions).intersection(filtered_subscriptions))
+    if filtered_accounts:
+        if gcp_accounts:
+            gcp_accounts = list(set(gcp_accounts).intersection(filtered_accounts))
         else:
-            azure_subscriptions = filtered_subscriptions
+            gcp_accounts = filtered_accounts
 
     daily_costs = {}
     monthly_costs = {}
-    if not is_org_admin and not (len(azure_subscriptions)):
+    if not is_org_admin and not (len(gcp_accounts)):
         return
 
-    monthly_params = {"group_by[subscription_guid]": "*"}
+    monthly_params = {"group_by[gcp_project]": "*"}
     daily_params = {}
-    if len(azure_subscriptions):
-        daily_params["filter[subscription_guid]"] = ",".join(azure_subscriptions)
-        monthly_params["filter[subscription_guid]"] = ",".join(azure_subscriptions)
+    if len(gcp_accounts):
+        daily_params["filter[account]"] = ",".join(gcp_accounts)
+        monthly_params["filter[account]"] = ",".join(gcp_accounts)
 
     daily_costs = get_daily_cost(report_type=report_type, params=daily_params, is_org_admin=is_org_admin)
     monthly_costs = get_monthly_cost(report_type=report_type, params=monthly_params, is_org_admin=is_org_admin)
@@ -73,40 +73,38 @@ def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
         formatted_delta = "{:.2f}".format(meta["delta"]["value"])
         current_month = date[:-3]
         print(
-            f"Azure costs for {current_month} are {formatted_total}"
+            f"GCP costs for {current_month} are {formatted_total}"
             f' {total["units"]} with a delta of'
             f' {formatted_delta} {total["units"]}'
         )
 
         monthly_data = monthly_costs.get("data", [{}])
-        subscription_data = monthly_data[0].get("subscription_guids", [])
+        project_data = monthly_data[0].get("gcp_projects", [])
 
-        subscription_breakdown = []
-        for sub_data in subscription_data:
-            sub_datum = sub_data.get("values", [{}])[0]
-            if filtered_subscriptions:
-                for fc in filtered_subscriptions:
-                    if fc in sub_datum.get("subscription_guid", []):
-                        subscription_breakdown.append(sub_datum)
+        project_breakdown = []
+        for proj_data in project_data:
+            proj_datum = proj_data.get("values", [{}])[0]
+            if filtered_accounts:
+                for fc in filtered_accounts:
+                    if fc in proj_datum.get("gcp_project", []):
+                        project_breakdown.append(proj_datum)
                     break
             else:
-                subscription_breakdown.append(sub_datum)
+                project_breakdown.append(proj_datum)
         if cost_order == "delta":
-            subscription_breakdown = sorted(subscription_breakdown, key=lambda i: i["delta_value"], reverse=True)
+            project_breakdown = sorted(project_breakdown, key=lambda i: i["delta_value"], reverse=True)
         else:
-            subscription_breakdown = sorted(
-                subscription_breakdown, key=lambda i: i["cost"]["total"]["value"], reverse=True
-            )
+            project_breakdown = sorted(project_breakdown, key=lambda i: i["cost"]["total"]["value"], reverse=True)
 
     email_template = Template(get_email_content(report_type))
     template_variables = {
         "cost_timeframe": current_month,
-        "azure_cost": float(formatted_total),
-        "azure_cost_delta": float(formatted_delta),
-        "azure_subscription_breakdown": subscription_breakdown,
+        "gcp_cost": float(formatted_total),
+        "gcp_cost_delta": float(formatted_delta),
+        "gcp_project_breakdown": project_breakdown,
         "web_url": PRODUCTION_ENDPOINT,
         "units": CURRENCY_SYMBOLS_MAP.get(total["units"]),
-        "azure_img_index": 1,
+        "gcp_img_index": 1,
     }
     for img_path in img_paths:
         file_name = img_path.split("/")[-1]
@@ -118,16 +116,17 @@ def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
 
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
     with open(tmp.name, "w", newline="") as csvfile:
-        fieldnames = ["subscription_id", "cost", "delta"]
+        fieldnames = ["project", "project_id", "cost", "delta"]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
         writer.writeheader()
-        for sub in subscription_breakdown:
+        for proj in project_breakdown:
             writer.writerow(
                 {
-                    "subscription_id": sub.get("subscription_guid"),
-                    "cost": sub.get("cost", {}).get("total", {}).get("value"),
-                    "delta": sub.get("delta_value"),
+                    "project": proj.get("gcp_project_alias"),
+                    "project_id": proj.get("gcp_project"),
+                    "cost": proj.get("cost", {}).get("total", {}).get("value"),
+                    "delta": proj.get("delta_value"),
                 }
             )
     images.append(tmp)

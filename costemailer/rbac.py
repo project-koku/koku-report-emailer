@@ -11,6 +11,7 @@ AWS_ORG_ACCESS = "cost-management:aws.organizational_unit:read"
 OPENSHIFT_CLUSTER_ACCESS = "cost-management:openshift.cluster:read"
 OPENSHIFT_PROJECT_ACCESS = "cost-management:openshift.project:read"
 AZURE_SUBSCRIPTION_ID_ACCESS = "cost-management:azure.subscription_guid:read"
+GCP_ACCOUNT_ACCESS = "cost-management:gcp.account:read"
 
 
 def get_rbac_data(path="status/", params={}):
