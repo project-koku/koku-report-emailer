@@ -18,6 +18,8 @@ from costemailer.config import Config
 def email_subject(report_type):
     today = datetime.today().strftime("%Y-%m-%d")
     subject = f"{report_type} Cost Management Report: {today}"
+    if len(report_type) > 3:
+        subject = f"{report_type.capitalize()} Cost Management Report: {today}"
     return subject
 
 
