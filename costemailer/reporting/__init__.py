@@ -1,7 +1,11 @@
 from costemailer import costquerier
 
 
-API_ENDPOINTS = {"AWS": costquerier.AWS_COST_ENDPOINT, "OCP": costquerier.OPENSHIFT_COST_ENDPOINT}
+API_ENDPOINTS = {
+    "AWS": costquerier.AWS_COST_ENDPOINT,
+    "OCP": costquerier.OPENSHIFT_COST_ENDPOINT,
+    "AZURE": costquerier.AZURE_COST_ENDPOINT,
+}
 
 
 def get_daily_cost(report_type, params={}, is_org_admin=False):

@@ -8,11 +8,13 @@ from costemailer import LOGO_PATH
 from costemailer.config import Config
 from costemailer.rbac import AWS_ACCOUNT_ACCESS
 from costemailer.rbac import AWS_ORG_ACCESS
+from costemailer.rbac import AZURE_SUBSCRIPTION_ID_ACCESS
 from costemailer.rbac import get_access
 from costemailer.rbac import get_users
 from costemailer.rbac import OPENSHIFT_CLUSTER_ACCESS
 from costemailer.rbac import OPENSHIFT_PROJECT_ACCESS
 from costemailer.reporting.aws import email_report as aws_email_report
+from costemailer.reporting.azure import email_report as azure_email_report
 from costemailer.reporting.ibm import email_report as ibm_email_report
 from costemailer.reporting.openshift import email_report as ocp_email_report
 
@@ -29,7 +31,14 @@ for user in account_users:
         print(f"User {username} is in recipient list with email {user_email}.")
         report_type = Config.COST_MGMT_RECIPIENTS.get(username, {}).get("report_type", DEFAULT_REPORT_TYPE)
         user_access = get_access(
-            username, [AWS_ACCOUNT_ACCESS, AWS_ORG_ACCESS, OPENSHIFT_CLUSTER_ACCESS, OPENSHIFT_PROJECT_ACCESS]
+            username,
+            [
+                AWS_ACCOUNT_ACCESS,
+                AWS_ORG_ACCESS,
+                OPENSHIFT_CLUSTER_ACCESS,
+                OPENSHIFT_PROJECT_ACCESS,
+                AZURE_SUBSCRIPTION_ID_ACCESS,
+            ],
         )
         reports_list = Config.COST_MGMT_RECIPIENTS.get(username, {}).get("reports", [])
         if not reports_list:
@@ -51,6 +60,7 @@ for user in account_users:
                 "aws.organizational_unit": user_access[AWS_ORG_ACCESS],
                 "openshift.cluster": user_access[OPENSHIFT_CLUSTER_ACCESS],
                 "openshift.project": user_access[OPENSHIFT_PROJECT_ACCESS],
+                "azure.subscriptions": user_access[AZURE_SUBSCRIPTION_ID_ACCESS],
                 "cc": cc_list + report_cc,
                 "report_type": report_type_item,
                 "filter": report_filter,
@@ -93,5 +103,7 @@ for email_item in email_list:  # noqa C901
         ocp_email_report(email_item, images, img_paths)
     elif report_type == "IBM":
         ibm_email_report(email_item, images, img_paths)
+    elif report_type == "AZURE":
+        azure_email_report(email_item, images, img_paths)
     else:
         pass
