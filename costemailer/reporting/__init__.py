@@ -5,6 +5,7 @@ API_ENDPOINTS = {
     "AWS": costquerier.AWS_COST_ENDPOINT,
     "OCP": costquerier.OPENSHIFT_COST_ENDPOINT,
     "AZURE": costquerier.AZURE_COST_ENDPOINT,
+    "GCP": costquerier.GCP_COST_ENDPOINT,
 }
 
 

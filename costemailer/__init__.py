@@ -11,6 +11,7 @@ REL_AWS_TEMPLATE_PATH = "resources/AwsCostEmailTemplate.html"
 REL_OPENSHIFT_TEMPLATE_PATH = "resources/OpenShiftCostEmailTemplate.html"
 REL_IBMCLOUD_TEMPLATE_PATH = "resources/IBMCloudCostEmailTemplate.html"
 REL_AZURE_TEMPLATE_PATH = "resources/AzureCostEmailTemplate.html"
+REL_GCP_TEMPLATE_PATH = "resources/GCPCostEmailTemplate.html"
 REL_LOGO_PATH = "resources/Logo-Red_Hat-cost-management-RGB.png"
 LOGO_PATH = Path(__file__).parent / REL_LOGO_PATH
 EMAIL_TEMPLATE_PATH = {
@@ -18,6 +19,7 @@ EMAIL_TEMPLATE_PATH = {
     "OCP": Path(__file__).parent / REL_OPENSHIFT_TEMPLATE_PATH,
     "IBM": Path(__file__).parent / REL_IBMCLOUD_TEMPLATE_PATH,
     "AZURE": Path(__file__).parent / REL_AZURE_TEMPLATE_PATH,
+    "GCP": Path(__file__).parent / REL_GCP_TEMPLATE_PATH,
 }
 CURRENCY_SYMBOLS_MAP = {
     "AED": "د.إ",
