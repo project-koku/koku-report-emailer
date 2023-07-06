@@ -503,16 +503,16 @@
                         <table class="rh-data-table">
                           <tbody>
                             <tr>
-                              <th role="rowheader">Subscription ID</th><th  style="text-align: right">Month-to-date Total</th><th style="text-align: right">Month-to-date Delta</th>
+                              <th role="rowheader">Subscription</th><th  style="text-align: right">Month-to-date Total</th><th style="text-align: right">Month-to-date Delta</th>
                             </tr>
                             {% for item in azure_subscription_breakdown %}
                             {% if item.delta_value > 0 %}
                             <tr>
-                              <td width="60%">{{ item.subscription_guid }}</td><td align="right">{{ units }}{{"{:,.2f}".format(item.cost.total.value)}}</td><td align="right" style="color:red">{{ units }}{{"{:,.2f}".format(item.delta_value)}}</td>
+                              <td width="60%">{{ item.subscription_name }}</td><td align="right">{{ units }}{{"{:,.2f}".format(item.cost.total.value)}}</td><td align="right" style="color:red">{{ units }}{{"{:,.2f}".format(item.delta_value)}}</td>
                             </tr>
                             {% else %}
                             <tr>
-                              <td width="60%">{{ item.subscription_guid }}</td><td align="right">{{ units }}{{"{:,.2f}".format(item.cost.total.value)}}</td><td align="right">{{ units }}{{"{:,.2f}".format(item.delta_value)}}</td>
+                              <td width="60%">{{ item.subscription_name }}</td><td align="right">{{ units }}{{"{:,.2f}".format(item.cost.total.value)}}</td><td align="right">{{ units }}{{"{:,.2f}".format(item.delta_value)}}</td>
                             </tr>
                             {% endif %}
                             {% endfor %}

@@ -84,9 +84,11 @@ def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
         subscription_breakdown = []
         for sub_data in subscription_data:
             sub_datum = sub_data.get("values", [{}])[0]
+            if "No-subscription_guid" in sub_datum.get("subscription_guid"):
+                continue
             if filtered_subscriptions:
                 for fc in filtered_subscriptions:
-                    if fc in sub_datum.get("subscription_guid", []):
+                    if fc in sub_datum.get("subscription_guid"):
                         subscription_breakdown.append(sub_datum)
                     break
             else:
@@ -118,7 +120,7 @@ def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
 
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
     with open(tmp.name, "w", newline="") as csvfile:
-        fieldnames = ["subscription_id", "cost", "delta"]
+        fieldnames = ["subscription_id", "subscription_name", "cost", "delta"]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
         writer.writeheader()
@@ -126,6 +128,7 @@ def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
             writer.writerow(
                 {
                     "subscription_id": sub.get("subscription_guid"),
+                    "subscription_name": sub.get("subscription_name"),
                     "cost": sub.get("cost", {}).get("total", {}).get("value"),
                     "delta": sub.get("delta_value"),
                 }
