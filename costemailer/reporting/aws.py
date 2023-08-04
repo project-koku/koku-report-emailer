@@ -457,7 +457,7 @@ def email_report(email_item, images, img_paths, **kwargs):  # noqa: C901
         tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
         with open(tmp.name, "w", newline="") as csvfile:
             fieldnames = ["account", "account_alias", "cost", "delta"]
-            if accounts_in_ous:
+            if accounts_in_ous or accounts_not_in_ous:
                 fieldnames.append("org_unit")
             if cost_center_list:
                 fieldnames.append("cost_center")
