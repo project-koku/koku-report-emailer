@@ -12,6 +12,8 @@ objects:
   data:
     clouddot-user: ''
     clouddot-password: ''
+    clouddot-service-account-id: ''
+    clouddot-service-account-secret: ''
     ibmcloud-apikey: ''
   type: Opaque
 
@@ -52,6 +54,18 @@ objects:
             valueFrom:
               secretKeyRef:
                 key: clouddot-password
+                name: koku-report-emailer-secret
+                optional: true
+          - name: CLOUD_DOT_SERVICE_ACCOUNT_ID
+            valueFrom:
+              secretKeyRef:
+                key: clouddot-service-account-id
+                name: koku-report-emailer-secret
+                optional: true
+          - name: CLOUD_DOT_SERVICE_ACCOUNT_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: clouddot-service-account-secret
                 name: koku-report-emailer-secret
                 optional: true
           - name: EMAIL_USER
