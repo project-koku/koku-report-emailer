@@ -29,13 +29,13 @@ def get_service_account_token():
 
 
 def get_rbac_credential_header():
+    if Config.CLOUD_DOT_SERVICE_ACCOUNT_ID and Config.CLOUD_DOT_SERVICE_ACCOUNT_SECRET:
+        token = get_service_account_token()
+        return {"Authorization": f"Bearer {token}"}
     if Config.CLOUD_DOT_USERNAME and Config.CLOUD_DOT_PASSWORD:
         cred = f"{Config.CLOUD_DOT_USERNAME}:{Config.CLOUD_DOT_PASSWORD}".encode("ascii")
         encoded_cred = base64.b64encode(cred).decode("ascii")
         return {"Authorization": f"Basic {encoded_cred}"}
-    if Config.CLOUD_DOT_SERVICE_ACCOUNT_ID and Config.CLOUD_DOT_SERVICE_ACCOUNT_SECRET:
-        token = get_service_account_token()
-        return {"Authorization": f"Bearer {token}"}
     return {}
 
 
