@@ -13,8 +13,17 @@ LOG = logging.getLogger(__name__)
 class Config:
     """Configuration for app."""
 
+    RUNTIME_MODE = os.getenv("RUNTIME_MODE", "job")
+    RECIPIENTS_OVERRIDE = os.getenv("RECIPIENTS_OVERRIDE")
+
     CLOUD_DOT_USERNAME = os.getenv("CLOUD_DOT_USERNAME")
     CLOUD_DOT_PASSWORD = os.getenv("CLOUD_DOT_PASSWORD")
+    CLOUD_DOT_SERVICE_ACCOUNT_ID = os.getenv("CLOUD_DOT_SERVICE_ACCOUNT_ID")
+    CLOUD_DOT_SERVICE_ACCOUNT_SECRET = os.getenv("CLOUD_DOT_SERVICE_ACCOUNT_SECRET")
+    CLOUD_DOT_SERVICE_ACCOUNT_URL = os.getenv(
+        "CLOUD_DOT_SERVICE_ACCOUNT_URL",
+        "https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token",
+    )
     CLOUD_DOT_API_ROOT = os.getenv("CLOUD_DOT_API_ROOT", "https://console.redhat.com/api/")
 
     IBM_CLOUD_API_KEY = os.getenv("IBM_CLOUD_API_KEY")
@@ -43,8 +52,11 @@ class Config:
             LOG.error("Failed to parse COST_MGMT_RECIPIENTS", err)
             exit(-1)
 
-    if CLOUD_DOT_USERNAME is None or CLOUD_DOT_PASSWORD is None:
+    if (CLOUD_DOT_USERNAME is None or CLOUD_DOT_PASSWORD is None) and (
+        CLOUD_DOT_SERVICE_ACCOUNT_ID is None or CLOUD_DOT_SERVICE_ACCOUNT_SECRET is None
+    ):
         LOG.warning(
             "You must provide environment variables CLOUD_DOT_USERNAME"
-            " and CLOUD_DOT_PASSWORD to execute the program."
+            " and CLOUD_DOT_PASSWORD or CLOUD_DOT_SERVICE_ACCOUNT_ID "
+            "and CLOUD_DOT_SERVICE_ACCOUNT_SECRET to execute the program."
         )

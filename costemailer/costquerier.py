@@ -3,6 +3,7 @@ import time
 import requests
 
 from .config import Config
+from .rbac import get_rbac_credential_header
 
 
 AWS_COST_ENDPOINT = "reports/aws/costs/"
@@ -18,10 +19,10 @@ CURRENT_COST_MONTH_PARAMS = {"filter[time_scope_units]": "month", "filter[time_s
 def get_cost_data(path="status/", params={}, retry_count=0):
     """Obtain the response cost data."""
     api_call = Config.CLOUD_DOT_API_ROOT + Config.COST_MGMT_API_PREFIX + path
-    credentials = (Config.CLOUD_DOT_USERNAME, Config.CLOUD_DOT_PASSWORD)
+    headers = get_rbac_credential_header()
 
     if retry_count < 3:
-        response = requests.get(api_call, params=params, auth=credentials)
+        response = requests.get(api_call, params=params, headers=headers)
         print(f"path={path}, params={params}, response.status_code={response.status_code}")
         if (
             response.status_code >= 200
