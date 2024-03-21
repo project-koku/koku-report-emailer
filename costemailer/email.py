@@ -33,7 +33,9 @@ def email(
     today = datetime.today()
     day_num = today.isoweekday()
 
-    if day_num not in email_iso_days:
+    if Config.RUNTIME_MODE == "dev":
+        recipients = [Config.RECIPIENTS_OVERRIDE]
+    elif day_num not in email_iso_days:
         print("Email not scheduled for today.")
         return
 

@@ -1,3 +1,5 @@
+import base64
+
 import requests
 
 from .config import Config
@@ -14,11 +16,34 @@ AZURE_SUBSCRIPTION_ID_ACCESS = "cost-management:azure.subscription_guid:read"
 GCP_ACCOUNT_ACCESS = "cost-management:gcp.account:read"
 
 
+def get_service_account_token():
+    payload = {
+        "client_id": Config.CLOUD_DOT_SERVICE_ACCOUNT_ID,
+        "client_secret": Config.CLOUD_DOT_SERVICE_ACCOUNT_SECRET,
+        "grant_type": "client_credentials",
+        "scope": "api.console api.iam.service_accounts",
+    }
+    response = requests.post(Config.CLOUD_DOT_SERVICE_ACCOUNT_URL, data=payload)
+    response_json = response.json()
+    return response_json.get("access_token")
+
+
+def get_rbac_credential_header():
+    if Config.CLOUD_DOT_USERNAME and Config.CLOUD_DOT_PASSWORD:
+        cred = f"{Config.CLOUD_DOT_USERNAME}:{Config.CLOUD_DOT_PASSWORD}".encode("ascii")
+        encoded_cred = base64.b64encode(cred).decode("ascii")
+        return {"Authorization": f"Basic {encoded_cred}"}
+    if Config.CLOUD_DOT_SERVICE_ACCOUNT_ID and Config.CLOUD_DOT_SERVICE_ACCOUNT_SECRET:
+        token = get_service_account_token()
+        return {"Authorization": f"Bearer {token}"}
+    return {}
+
+
 def get_rbac_data(path="status/", params={}):
     """Obtain the response rbac data."""
     api_call = Config.CLOUD_DOT_API_ROOT + Config.RBAC_API_PREFIX + path
-    credentials = (Config.CLOUD_DOT_USERNAME, Config.CLOUD_DOT_PASSWORD)
-    response = requests.get(api_call, params=params, auth=credentials)
+    headers = get_rbac_credential_header()
+    response = requests.get(api_call, params=params, headers=headers)
 
     if (
         response.status_code >= 200
