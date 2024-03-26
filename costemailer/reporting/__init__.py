@@ -28,3 +28,13 @@ def get_monthly_cost(report_type, params={}, is_org_admin=False):
     #     monthly_params.update(params)
 
     return costquerier.get_cost_data(path=api_endpoint, params=monthly_params)
+
+
+def get_recommendations(report_type, params, is_org_admin=False):
+    if report_type != "OCP":
+        return {}
+    api_endpoint = costquerier.OPENSHIFT_RECOMMENDATIONS_ENDPOINT
+    rec_params = costquerier.RECOMMENDATION_PARAMS.copy()
+    rec_params.update(params)
+
+    return costquerier.get_cost_data(path=api_endpoint, params=rec_params)

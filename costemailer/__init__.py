@@ -9,17 +9,23 @@ DEFAULT_ACCOUNT_LIMIT = 300
 PRODUCTION_ENDPOINT = "https://console.redhat.com"
 REL_AWS_TEMPLATE_PATH = "resources/AwsCostEmailTemplate.html"
 REL_OPENSHIFT_TEMPLATE_PATH = "resources/OpenShiftCostEmailTemplate.html"
+REL_OPENSHIFT_REC_TEMPLATE_PATH = "resources/OpenShiftRecommendationEmailTemplate.html"
 REL_IBMCLOUD_TEMPLATE_PATH = "resources/IBMCloudCostEmailTemplate.html"
 REL_AZURE_TEMPLATE_PATH = "resources/AzureCostEmailTemplate.html"
 REL_GCP_TEMPLATE_PATH = "resources/GCPCostEmailTemplate.html"
 REL_LOGO_PATH = "resources/Logo-Red_Hat-cost-management-RGB.png"
 LOGO_PATH = Path(__file__).parent / REL_LOGO_PATH
 EMAIL_TEMPLATE_PATH = {
-    "AWS": Path(__file__).parent / REL_AWS_TEMPLATE_PATH,
-    "OCP": Path(__file__).parent / REL_OPENSHIFT_TEMPLATE_PATH,
-    "IBM": Path(__file__).parent / REL_IBMCLOUD_TEMPLATE_PATH,
-    "AZURE": Path(__file__).parent / REL_AZURE_TEMPLATE_PATH,
-    "GCP": Path(__file__).parent / REL_GCP_TEMPLATE_PATH,
+    "cost": {
+        "AWS": Path(__file__).parent / REL_AWS_TEMPLATE_PATH,
+        "OCP": Path(__file__).parent / REL_OPENSHIFT_TEMPLATE_PATH,
+        "IBM": Path(__file__).parent / REL_IBMCLOUD_TEMPLATE_PATH,
+        "AZURE": Path(__file__).parent / REL_AZURE_TEMPLATE_PATH,
+        "GCP": Path(__file__).parent / REL_GCP_TEMPLATE_PATH,
+    },
+    "recommendation": {
+        "OCP": Path(__file__).parent / REL_OPENSHIFT_REC_TEMPLATE_PATH,
+    },
 }
 CURRENCY_SYMBOLS_MAP = {
     "AED": "د.إ",
@@ -198,6 +204,6 @@ CURRENCY_SYMBOLS_MAP = {
 }
 
 
-def get_email_content(report_type):
-    with open(EMAIL_TEMPLATE_PATH.get(report_type)) as email_template:
+def get_email_content(report_type, report_feature="cost"):
+    with open(EMAIL_TEMPLATE_PATH.get(report_feature).get(report_type)) as email_template:
         return email_template.read()

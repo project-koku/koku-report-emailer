@@ -15,11 +15,13 @@ from costemailer import get_email_content
 from costemailer.config import Config
 
 
-def email_subject(report_type):
+def email_subject(report_type, report_feature=None):
     today = datetime.today().strftime("%Y-%m-%d")
     subject = f"{report_type} Cost Management Report: {today}"
     if len(report_type) > 3:
         subject = f"{report_type.capitalize()} Cost Management Report: {today}"
+    if report_feature:
+        subject = f"{subject} {report_feature}"
     return subject
 
 
