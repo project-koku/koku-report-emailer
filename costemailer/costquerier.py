@@ -12,8 +12,10 @@ AWS_COST_CATEGORIES_ENDPOINT = "resource-types/aws-categories/"
 AZURE_COST_ENDPOINT = "reports/azure/costs/"
 GCP_COST_ENDPOINT = "reports/gcp/costs/"
 OPENSHIFT_COST_ENDPOINT = "reports/openshift/costs/"
+OPENSHIFT_RECOMMENDATIONS_ENDPOINT = "recommendations/openshift"
 CURRENT_MONTH_PARAMS = {"filter[time_scope_units]": "month", "filter[time_scope_value]": "-1", "limit": "1000"}
 CURRENT_COST_MONTH_PARAMS = {"filter[time_scope_units]": "month", "filter[time_scope_value]": "-1", "delta": "cost"}
+RECOMMENDATION_PARAMS = {"limit": 100, "offset": 0, "order_by": "cluster", "order_how": "desc"}
 
 
 def get_cost_data(path="status/", params={}, retry_count=0):
