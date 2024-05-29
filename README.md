@@ -9,7 +9,7 @@ Delivers regular emails of cost management data in an HTML format
 
 # <a name="intro"></a> Getting Started
 
-This is a Python project developed using Python 3.8. Make sure you have at least this version installed.
+This is a Python project developed using Python 3.11. Make sure you have at least this version installed.
 
 # <a name="development"></a> Development
 
