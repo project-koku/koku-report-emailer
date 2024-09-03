@@ -32,7 +32,7 @@ def get_resource_dict(resource_def):
             value = res_detail.get("amount")
             format = res_detail.get("format")
             if format:
-                value = f"{value}{format}"
+                value = f"{value} {format}"
             res_dict[def_item][res_type] = value
     return res_dict
 
