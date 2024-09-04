@@ -32,7 +32,11 @@ def get_resource_dict(resource_def):
             value = res_detail.get("amount")
             format = res_detail.get("format")
             if format:
-                value = f"{value} {format}"
+                if format == "bytes":
+                    convert_bytes_to_mib = value / (1024 * 1024)
+                    value = f"{convert_bytes_to_mib} MiB"
+                else:
+                    value = f"{value} {format}"
             res_dict[def_item][res_type] = value
     return res_dict
 
