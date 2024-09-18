@@ -136,7 +136,7 @@ parameters:
   required: true
 - description: Image name
   name: IMAGE
-  value: quay.io/cloudservices/koku-report-emailer
+  value: quay.io/redhat-services-prod/cost-mgmt-dev-tenant/koku-report-emailer
 - description: Determines Clowder deployment
   name: CLOWDER_ENABLED
   value: "true"
