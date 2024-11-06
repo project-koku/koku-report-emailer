@@ -2,10 +2,11 @@
 **
 
 # ... except for dependencies and source
+!costemailer/
+!LICENSE
 !Pipfile
 !Pipfile.lock
 !send_email.py
-!costemailer/
 
 # keep the test files out of the final image
 **/*test*

@@ -71,6 +71,8 @@ ENV \
 COPY costemailer costemailer
 COPY send_email.py .
 
+COPY LICENSE /licenses/MIT.txt
+
 # create the koku user
 RUN \
     adduser koku -u ${USER_ID} -g 0 && \
