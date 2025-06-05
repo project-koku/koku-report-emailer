@@ -20,6 +20,9 @@ metadata:
   name: koku-report-emailer-pr
 
 spec:
+  taskRunTemplate:
+    serviceAccountName: build-pipeline-koku-report-emailer
+
   params:
     - name: git-url
       value: '{{source_url}}'
