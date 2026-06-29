@@ -7,11 +7,12 @@ verify_ssl = true
 pre-commit = "*"
 
 [packages]
-requests = "*"
 jinja2 = "*"
 matplotlib = "*"
 pandas = "*"
 pyyaml = "*"
+certifi = "*"
+requests = "*"
 
 [requires]
 python_version = "3.11"
