@@ -53,7 +53,7 @@
         {
             "matchDatasources": ["docker"],
             "matchPackageNames": [
-                "registry.redhat.io/ubi9/ubi-minimal"
+                "registry.redhat.io/ubi9-minimal"
             ],
             "versioning": "redhat"
         }
