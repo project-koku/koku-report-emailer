@@ -25,6 +25,6 @@ repos:
   - id: debug-statements
   - id: flake8
 - repo: https://github.com/haizaar/check-pipfile-lock
-  rev: v0.0.3
+  rev: v0.0.5
   hooks:
     - id: check-pipfile-lock
