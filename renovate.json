@@ -18,6 +18,15 @@
     "packageRules": [
         {
             "matchManagers": [
+                "pre-commit"
+            ],
+            "groupName": "pre-commit hooks",
+            "addLabels": [
+                "dependencies"
+            ]
+        },
+        {
+            "matchManagers": [
                 "pipenv"
             ],
             "groupName": "python-dependencies",
@@ -47,7 +56,7 @@
                 "dockerfile"
             ],
             "addLabels": [
-                "dependencies"
+                "base-image"
             ]
         },
         {
