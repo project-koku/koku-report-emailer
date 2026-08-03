@@ -1,4 +1,4 @@
-FROM registry.redhat.io/ubi9-minimal:9.8-1784092902
+FROM registry.redhat.io/ubi9-minimal:9.8-1785214301
 
 ARG PIPENV_DEV=False
 ARG USER_ID=1000
