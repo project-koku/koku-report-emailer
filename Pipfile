@@ -11,8 +11,11 @@ jinja2 = "*"
 matplotlib = "*"
 pandas = "*"
 pyyaml = "*"
-certifi = "*"
+# COST-8554: eMudhra root distrust — keep certifi at/above 2026.10.19
+certifi = ">=2026.10.19"
 requests = "*"
+# COST-8485/8486/8488/8489/8493/8559: Pillow CVE floor
+pillow = ">=13.0.0"
 
 [requires]
 python_version = "3.11"
